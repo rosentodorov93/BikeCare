@@ -16,6 +16,15 @@ export function migrate(): void {
       created_at    TEXT NOT NULL,
       updated_at    TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS components (
+      id         TEXT PRIMARY KEY,
+      bike_id    TEXT NOT NULL REFERENCES bicycles(id) ON DELETE CASCADE,
+      name       TEXT NOT NULL,
+      wear_state REAL NOT NULL DEFAULT 0
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_components_bike_id ON components(bike_id);
   `);
 }
 

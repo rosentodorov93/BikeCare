@@ -13,6 +13,7 @@ import {
   WheelSize,
 } from '../bicycle.model';
 import { BicycleService } from '../bicycle.service';
+import { COMPONENT_LIST_TYPES, ComponentListType } from '../../components/component.model';
 
 @Component({
   selector: 'bc-bicycle-form',
@@ -28,6 +29,7 @@ export class BicycleFormComponent {
 
   protected readonly types = BICYCLE_TYPES;
   protected readonly wheelSizes = WHEEL_SIZES;
+  protected readonly componentListTypes = COMPONENT_LIST_TYPES;
 
   protected readonly id = this.route.snapshot.paramMap.get('id');
   protected readonly isEdit = computed(() => this.id !== null);
@@ -43,6 +45,10 @@ export class BicycleFormComponent {
     purchaseDate: this.fb.control<string | null>(null),
     frameSize: this.fb.control<string | null>(null),
     wheelSize: this.fb.control<WheelSize | null>(null),
+    // Create-only: seeds the bike's components. Ignored on edit (see submit()).
+    componentListType: this.fb.control<ComponentListType>('no_suspension', {
+      validators: [Validators.required],
+    }),
   });
 
   constructor() {
@@ -70,6 +76,11 @@ export class BicycleFormComponent {
       frameSize: value.frameSize?.trim() || null,
       wheelSize: value.wheelSize || null,
     };
+    // Only attach the component list type when creating — edits never touch
+    // the existing components.
+    if (!this.isEdit()) {
+      payload.componentListType = value.componentListType;
+    }
 
     this.submitting.set(true);
     const request$ = this.id

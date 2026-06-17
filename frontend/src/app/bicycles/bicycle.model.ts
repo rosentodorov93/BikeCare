@@ -18,6 +18,9 @@ export const WHEEL_SIZES = ['26"', '27.5"', '29"', '700c', '650b', 'other'] as c
 
 export type WheelSize = (typeof WHEEL_SIZES)[number];
 
+export type { ComponentListType } from '../components/component.model';
+import type { ComponentListType } from '../components/component.model';
+
 export interface Bicycle {
   id: string;
   name: string;
@@ -40,6 +43,9 @@ export interface BicyclePayload {
   purchaseDate: string | null;
   frameSize: string | null;
   wheelSize: WheelSize | null;
+  // Only sent on create — it seeds the bike's components. Edits omit it so the
+  // existing components (and their wear) are left untouched.
+  componentListType?: ComponentListType;
 }
 
 export function bicycleTypeLabel(type: BicycleType): string {

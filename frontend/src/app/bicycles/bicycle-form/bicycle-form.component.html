@@ -65,6 +65,20 @@
       </div>
     </div>
 
+    <!-- Create-only: picks the set of components attached to the new bike.
+         Hidden on edit since changing it would not regenerate components. -->
+    @if (!isEdit()) {
+      <div class="field">
+        <label for="componentListType">Component list type <span class="req">*</span></label>
+        <select id="componentListType" formControlName="componentListType">
+          @for (c of componentListTypes; track c.value) {
+            <option [value]="c.value">{{ c.label }}</option>
+          }
+        </select>
+        <small class="hint">Sets the components attached to this bike (all start at 0% wear).</small>
+      </div>
+    }
+
     <div class="actions">
       <button type="submit" class="btn btn-primary" [disabled]="submitting()">
         {{ submitting() ? 'Saving…' : isEdit() ? 'Save changes' : 'Create bike' }}

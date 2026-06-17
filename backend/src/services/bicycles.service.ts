@@ -2,7 +2,10 @@ import type {
   CreateBicycleDto,
   UpdateBicycleDto,
 } from '../controllers/bicycles.controller.js';
+import { db } from '../db/connection.js';
 import { bicycleRepository } from '../repositories/bicycles.repository.js';
+import { componentRepository } from '../repositories/components.repository.js';
+import { componentService } from './components.service.js';
 import type { Bicycle } from '../types/bicycle.js';
 import { ApiError } from '../utils/api-response.js';
 
@@ -34,7 +37,17 @@ export const bicycleService = {
       createdAt: now,
       updatedAt: now,
     };
-    return bicycleRepository.insert(bicycle);
+
+    // A new bike comes with its set of components (seeded at 0% wear) determined
+    // by the chosen list type. Insert both atomically so a bike never ends up
+    // half-created without its components.
+    const components = componentService.buildForBike(bicycle.id, dto.componentListType);
+    db.transaction(() => {
+      bicycleRepository.insert(bicycle);
+      componentRepository.insertMany(components);
+    })();
+
+    return bicycleRepository.findById(bicycle.id) as Bicycle;
   },
 
   async update(id: string, dto: UpdateBicycleDto): Promise<Bicycle> {

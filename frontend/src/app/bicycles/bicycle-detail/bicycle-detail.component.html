@@ -32,6 +32,32 @@
         <div><dt>Wheel size</dt><dd>{{ bike.wheelSize || '—' }}</dd></div>
       </dl>
 
+      <section class="components">
+        <h2>Components</h2>
+        @if (components().length > 0) {
+          <ul class="component-list">
+            @for (component of components(); track component.id) {
+              <li class="component">
+                <span class="component-icon"><bc-component-icon [name]="component.name" /></span>
+                <span class="component-name">{{ component.name }}</span>
+                <span class="wear">
+                  <span class="wear-track">
+                    <span
+                      class="wear-fill"
+                      [class]="wearLevel(component.wearState)"
+                      [style.width.%]="component.wearState"
+                    ></span>
+                  </span>
+                  <span class="wear-pct">{{ component.wearState }}%</span>
+                </span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="state-msg">No components tracked yet.</p>
+        }
+      </section>
+
       <div class="actions">
         <a class="btn btn-primary" [routerLink]="['/bicycles', bike.id, 'edit']">Edit</a>
         <button

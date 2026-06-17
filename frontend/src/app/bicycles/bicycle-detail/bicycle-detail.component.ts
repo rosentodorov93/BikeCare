@@ -5,6 +5,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
 import { Bicycle, bicycleTypeLabel } from '../bicycle.model';
 import { BicycleService } from '../bicycle.service';
+import { ComponentService } from '../../components/component.service';
+import { ComponentIconComponent } from '../../components/component-icon/component-icon.component';
 
 type DetailState =
   | { status: 'loading' }
@@ -13,7 +15,7 @@ type DetailState =
 
 @Component({
   selector: 'bc-bicycle-detail',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, ComponentIconComponent],
   templateUrl: './bicycle-detail.component.html',
   styleUrl: './bicycle-detail.component.scss',
 })
@@ -21,9 +23,16 @@ export class BicycleDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly service = inject(BicycleService);
+  private readonly componentService = inject(ComponentService);
 
   protected readonly id = this.route.snapshot.paramMap.get('id') ?? '';
   protected readonly deleting = signal(false);
+
+  // Components load independently of the bike; on error we just show none.
+  protected readonly components = toSignal(
+    this.componentService.getByBike(this.id).pipe(catchError(() => of([]))),
+    { initialValue: [] },
+  );
 
   private readonly state = toSignal(
     this.service.getById(this.id).pipe(
@@ -42,6 +51,13 @@ export class BicycleDetailComponent {
     const b = this.bicycle();
     return b ? bicycleTypeLabel(b.type) : '';
   });
+
+  // Maps a wear percentage to a severity class used to colour the wear bar.
+  protected wearLevel(wear: number): 'ok' | 'warn' | 'danger' {
+    if (wear > 80) return 'danger';
+    if (wear > 50) return 'warn';
+    return 'ok';
+  }
 
   protected confirmDelete(): void {
     const bike = this.bicycle();

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { asyncHandler } from '../middleware/async-handler.js';
 import { bicycleService } from '../services/bicycles.service.js';
 import { BICYCLE_TYPES, WHEEL_SIZES } from '../types/bicycle.js';
+import { COMPONENT_LIST_TYPES } from '../types/component.js';
 import { ok } from '../utils/api-response.js';
 
 // Request DTOs (co-located with the controller that uses them). An empty string
@@ -10,7 +11,7 @@ import { ok } from '../utils/api-response.js';
 // is stored consistently.
 const emptyToNull = (v: unknown) => (v === '' ? null : v);
 
-export const createBicycleSchema = z.object({
+const bicycleFields = {
   name: z.string().trim().min(1, 'is required'),
   brand: z.string().trim().min(1, 'is required'),
   model: z.string().trim().min(1, 'is required'),
@@ -18,9 +19,16 @@ export const createBicycleSchema = z.object({
   purchaseDate: z.preprocess(emptyToNull, z.string().date().nullable().default(null)),
   frameSize: z.preprocess(emptyToNull, z.string().trim().min(1).nullable().default(null)),
   wheelSize: z.preprocess(emptyToNull, z.enum(WHEEL_SIZES).nullable().default(null)),
+};
+
+// `componentListType` only drives component creation, so it lives on the create
+// schema. Edits never regenerate components, so the update schema omits it.
+export const createBicycleSchema = z.object({
+  ...bicycleFields,
+  componentListType: z.enum(COMPONENT_LIST_TYPES).default('no_suspension'),
 });
 
-export const updateBicycleSchema = createBicycleSchema;
+export const updateBicycleSchema = z.object(bicycleFields);
 
 export type CreateBicycleDto = z.infer<typeof createBicycleSchema>;
 export type UpdateBicycleDto = z.infer<typeof updateBicycleSchema>;
