@@ -1,7 +1,21 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'bicycles' },
+  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./dashboard/dashboard.component').then(
+        (m) => m.DashboardComponent,
+      ),
+  },
+  {
+    path: 'activities',
+    loadComponent: () =>
+      import('./activities/activities.component').then(
+        (m) => m.ActivitiesComponent,
+      ),
+  },
   {
     path: 'bicycles',
     loadComponent: () =>
@@ -30,5 +44,5 @@ export const routes: Routes = [
         (m) => m.BicycleFormComponent,
       ),
   },
-  { path: '**', redirectTo: 'bicycles' },
+  { path: '**', redirectTo: 'dashboard' },
 ];
