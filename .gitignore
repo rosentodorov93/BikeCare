@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Backend
+backend/dist/
+backend/data/
+*.db
+*.db-journal
+
+# Frontend
+frontend/dist/
+frontend/.angular/
+
+# Misc
+.env
+*.log
+.DS_Store

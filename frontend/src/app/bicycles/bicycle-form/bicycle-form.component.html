@@ -1,0 +1,75 @@
+<a class="back-link" routerLink="/bicycles">← Back to bikes</a>
+
+<h1>{{ isEdit() ? 'Edit bike' : 'Add a bike' }}</h1>
+
+@if (loadError()) {
+  <p class="state-error">Couldn't load this bike to edit.</p>
+} @else {
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="name">Name <span class="req">*</span></label>
+      <input id="name" type="text" formControlName="name" placeholder="e.g. Weekend Roadie" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <small class="error">Name is required.</small>
+      }
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="brand">Brand <span class="req">*</span></label>
+        <input id="brand" type="text" formControlName="brand" placeholder="e.g. Trek" />
+        @if (form.controls.brand.touched && form.controls.brand.invalid) {
+          <small class="error">Brand is required.</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="model">Model <span class="req">*</span></label>
+        <input id="model" type="text" formControlName="model" placeholder="e.g. Domane SL" />
+        @if (form.controls.model.touched && form.controls.model.invalid) {
+          <small class="error">Model is required.</small>
+        }
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="type">Type <span class="req">*</span></label>
+        <select id="type" formControlName="type">
+          @for (t of types; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="purchaseDate">Purchase date</label>
+        <input id="purchaseDate" type="date" formControlName="purchaseDate" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="frameSize">Frame size</label>
+        <input id="frameSize" type="text" formControlName="frameSize" placeholder="e.g. 56cm, M, L" />
+      </div>
+
+      <div class="field">
+        <label for="wheelSize">Wheel size</label>
+        <select id="wheelSize" formControlName="wheelSize">
+          <option [ngValue]="null">— Select —</option>
+          @for (w of wheelSizes; track w) {
+            <option [ngValue]="w">{{ w }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+        {{ submitting() ? 'Saving…' : isEdit() ? 'Save changes' : 'Create bike' }}
+      </button>
+      <a class="btn btn-secondary" routerLink="/bicycles">Cancel</a>
+    </div>
+  </form>
+}

@@ -1,0 +1,15 @@
+<a class="card" [routerLink]="['/bicycles', bicycle().id]">
+  <div class="card-head">
+    <h3 class="card-name">{{ bicycle().name }}</h3>
+    <span class="badge">{{ typeLabel() }}</span>
+  </div>
+  <p class="card-sub">{{ bicycle().brand }} {{ bicycle().model }}</p>
+  <dl class="card-meta">
+    @if (bicycle().frameSize) {
+      <div><dt>Frame</dt><dd>{{ bicycle().frameSize }}</dd></div>
+    }
+    @if (bicycle().wheelSize) {
+      <div><dt>Wheels</dt><dd>{{ bicycle().wheelSize }}</dd></div>
+    }
+  </dl>
+</a>

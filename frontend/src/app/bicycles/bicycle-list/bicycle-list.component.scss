@@ -1,0 +1,44 @@
+.list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.state-msg {
+  color: var(--bc-muted);
+}
+
+.state-error {
+  color: var(--bc-danger);
+}
+
+.empty {
+  text-align: center;
+  background: var(--bc-surface);
+  border: 1px dashed var(--bc-border);
+  border-radius: var(--bc-radius);
+  padding: 3rem 1.5rem;
+
+  .empty-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+  }
+
+  .empty-sub {
+    color: var(--bc-muted);
+    margin: 0 0 1.25rem;
+  }
+}

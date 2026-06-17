@@ -1,0 +1,80 @@
+:root {
+  --bc-bg: #f5f6f8;
+  --bc-surface: #ffffff;
+  --bc-border: #e2e5ea;
+  --bc-text: #1c2330;
+  --bc-muted: #6b7280;
+  --bc-primary: #2563eb;
+  --bc-primary-hover: #1d4ed8;
+  --bc-danger: #dc2626;
+  --bc-danger-hover: #b91c1c;
+  --bc-radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bc-bg);
+  color: var(--bc-text);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--bc-primary);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--bc-radius);
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.btn-primary {
+  background: var(--bc-primary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--bc-primary-hover);
+}
+
+.btn-secondary {
+  background: var(--bc-surface);
+  color: var(--bc-text);
+  border-color: var(--bc-border);
+}
+.btn-secondary:hover {
+  background: var(--bc-bg);
+}
+
+.btn-danger {
+  background: var(--bc-danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: var(--bc-danger-hover);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

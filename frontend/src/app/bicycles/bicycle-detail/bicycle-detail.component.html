@@ -1,0 +1,48 @@
+@switch (status()) {
+  @case ('loading') {
+    <p class="state-msg">Loading…</p>
+  }
+  @case ('error') {
+    <div class="state-msg state-error">
+      <p>Bike not found.</p>
+      <a class="btn btn-secondary" routerLink="/bicycles">← Back to bikes</a>
+    </div>
+  }
+  @default {
+    @if (bicycle(); as bike) {
+      <a class="back-link" routerLink="/bicycles">← Back to bikes</a>
+
+      <div class="detail-head">
+        <div>
+          <h1>{{ bike.name }}</h1>
+          <p class="subtitle">{{ bike.brand }} {{ bike.model }}</p>
+        </div>
+        <span class="badge">{{ typeLabel() }}</span>
+      </div>
+
+      <dl class="spec">
+        <div><dt>Brand</dt><dd>{{ bike.brand }}</dd></div>
+        <div><dt>Model</dt><dd>{{ bike.model }}</dd></div>
+        <div><dt>Type</dt><dd>{{ typeLabel() }}</dd></div>
+        <div>
+          <dt>Purchase date</dt>
+          <dd>{{ bike.purchaseDate ? (bike.purchaseDate | date: 'mediumDate') : '—' }}</dd>
+        </div>
+        <div><dt>Frame size</dt><dd>{{ bike.frameSize || '—' }}</dd></div>
+        <div><dt>Wheel size</dt><dd>{{ bike.wheelSize || '—' }}</dd></div>
+      </dl>
+
+      <div class="actions">
+        <a class="btn btn-primary" [routerLink]="['/bicycles', bike.id, 'edit']">Edit</a>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="confirmDelete()"
+          [disabled]="deleting()"
+        >
+          {{ deleting() ? 'Deleting…' : 'Delete' }}
+        </button>
+      </div>
+    }
+  }
+}

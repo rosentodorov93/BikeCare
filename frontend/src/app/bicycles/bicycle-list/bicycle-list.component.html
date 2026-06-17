@@ -1,0 +1,28 @@
+<div class="list-head">
+  <h1>My Bikes</h1>
+  <a class="btn btn-primary" routerLink="/bicycles/new">+ Add bike</a>
+</div>
+
+@switch (status()) {
+  @case ('loading') {
+    <p class="state-msg">Loading bikes…</p>
+  }
+  @case ('error') {
+    <p class="state-msg state-error">Couldn't load bikes. Is the API running?</p>
+  }
+  @default {
+    @if (bicycles().length > 0) {
+      <div class="grid">
+        @for (bike of bicycles(); track bike.id) {
+          <bc-bicycle-card [bicycle]="bike" />
+        }
+      </div>
+    } @else {
+      <div class="empty">
+        <p class="empty-title">No bikes yet</p>
+        <p class="empty-sub">Add your first bike to start tracking its upkeep.</p>
+        <a class="btn btn-primary" routerLink="/bicycles/new">+ Add bike</a>
+      </div>
+    }
+  }
+}

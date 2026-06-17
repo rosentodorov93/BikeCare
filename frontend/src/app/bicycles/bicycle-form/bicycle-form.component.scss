@@ -1,0 +1,77 @@
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  color: var(--bc-muted);
+}
+
+h1 {
+  margin: 0 0 1.5rem;
+  font-size: 1.8rem;
+}
+
+.form {
+  max-width: 620px;
+  background: var(--bc-surface);
+  border: 1px solid var(--bc-border);
+  border-radius: var(--bc-radius);
+  padding: 1.75rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.1rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  input,
+  select {
+    font: inherit;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--bc-border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--bc-text);
+
+    &:focus {
+      outline: none;
+      border-color: var(--bc-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+  }
+}
+
+.req {
+  color: var(--bc-danger);
+}
+
+.error {
+  color: var(--bc-danger);
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+}
+
+.state-error {
+  color: var(--bc-danger);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}

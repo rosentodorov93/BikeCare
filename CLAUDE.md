@@ -8,7 +8,7 @@ The long-term goal is a tool that answers, for any bike in the garage: *what sha
 
 ## Core Domain Goals
 
-- **Register bicycles** — owners add bikes with identifying details (make, model, year, type, purchase date, etc.) and the set of components fitted to them.
+- **Register bicycles** — owners add bikes with identifying details (name, brand, model, type, purchase date, frame size, wheel size, etc.) and the set of components fitted to them.
 - **Track maintenance history** — a chronological record of everything done to a bike: services, repairs, part replacements, inspections.
 - **Schedule future maintenance** — maintenance can be planned ahead of time, either on a calendar basis (e.g. every 6 months) or a usage basis (e.g. every 2000 km), with reminders/due-status surfaced to the user.
 - **Monitor component wear** — individual components (chain, tires, brake pads, cassette, etc.) accumulate wear from logged activities and are flagged as they approach end-of-life.
@@ -52,7 +52,7 @@ BikeCare/
 
 These are the core entities the system is built around. Exact schema/fields will be finalized during implementation, but the relationships are foundational to the design:
 
-- **Bicycle** — a single bike owned by a user. Has identifying info (name, make, model, year, type) and owns a set of Components.
+- **Bicycle** — a single bike owned by a user. Has identifying info (name, brand, model, type, purchase date, frame size, wheel size) and owns a set of Components.
 - **Component** — a part fitted to a bicycle (e.g. chain, tires, brake pads, cassette, cables). Has an install date, expected lifespan (by time and/or distance), and accumulated wear/usage derived from Activities. May be replaced, which closes out its history and starts a new Component instance.
 - **Activity** — a logged ride/usage event for a bicycle (distance, duration, date, conditions). Drives wear accumulation on the bicycle's components.
 - **MaintenanceRecord / ServiceRecord** — a record of work performed on a bicycle or a specific component: service, repair, inspection, or part replacement. Includes date, usage at time of service, parts/cost/notes. Forms the maintenance history.
