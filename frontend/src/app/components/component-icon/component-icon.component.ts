@@ -9,8 +9,8 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   template: `
     <svg
       viewBox="0 0 24 24"
-      width="24"
-      height="24"
+      [attr.width]="size()"
+      [attr.height]="size()"
       fill="none"
       stroke="currentColor"
       stroke-width="1.6"
@@ -72,6 +72,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 })
 export class ComponentIconComponent {
   readonly name = input.required<string>();
+  readonly size = input<number>(24);
 
   protected readonly key = computed(() => this.name().toLowerCase());
 }

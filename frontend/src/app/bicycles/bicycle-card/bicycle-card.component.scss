@@ -1,5 +1,6 @@
 .card {
   display: block;
+  position: relative;
   background: var(--bc-surface);
   border: 1px solid var(--bc-border);
   border-radius: var(--bc-radius);
@@ -7,12 +8,36 @@
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
+  overflow: hidden;
 }
 
 .card:hover {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
+
+// Colored left stripe via ::before — no layout impact, no border-width change.
+.card--ok::before,
+.card--warn::before,
+.card--danger::before,
+.card--worn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.card--ok::before    { background: #16a34a; }
+.card--warn::before  { background: #d97706; }
+.card--danger::before { background: #ea580c; }
+.card--worn::before  { background: var(--bc-danger); }
+
+.card--ok    { background: rgba(22, 163, 74, 0.04); }
+.card--warn  { background: rgba(217, 119, 6, 0.04); }
+.card--danger { background: rgba(234, 88, 12, 0.04); }
+.card--worn  { background: rgba(220, 38, 38, 0.05); }
 
 .card-head {
   display: flex;
@@ -62,4 +87,40 @@
     margin: 0;
     font-weight: 600;
   }
+}
+
+.wear-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bc-border);
+}
+
+.component-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.c-icon {
+  display: inline-flex;
+
+  &.c-icon--ok     { color: #16a34a; }
+  &.c-icon--warn   { color: #d97706; }
+  &.c-icon--danger { color: #ea580c; }
+  &.c-icon--worn   { color: var(--bc-danger); }
+}
+
+.due-badge {
+  background: var(--bc-danger);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
 }

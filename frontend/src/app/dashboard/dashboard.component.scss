@@ -1,0 +1,264 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dash-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--bc-muted);
+    font-size: 0.95rem;
+  }
+}
+
+/* Period selector — segmented control */
+.period-selector {
+  display: inline-flex;
+  background: var(--bc-surface);
+  border: 1px solid var(--bc-border);
+  border-radius: var(--bc-radius);
+  padding: 3px;
+  gap: 2px;
+}
+
+.period-btn {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--bc-muted);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    color: var(--bc-text);
+  }
+
+  &.active {
+    background: var(--bc-primary);
+    color: #fff;
+  }
+}
+
+/* Shared card surface */
+.card {
+  background: var(--bc-surface);
+  border: 1px solid var(--bc-border);
+  border-radius: var(--bc-radius);
+  padding: 1.1rem 1.2rem;
+}
+
+.state-msg {
+  color: var(--bc-muted);
+
+  &.error {
+    color: var(--bc-danger);
+  }
+}
+
+/* Stat cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--bc-text);
+
+    small {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--bc-muted);
+    }
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--bc-muted);
+  }
+}
+
+/* Two-column panel layout */
+.panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.panel {
+  h2 {
+    margin: 0 0 0.9rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+}
+
+.empty {
+  margin: 0;
+  color: var(--bc-muted);
+  font-size: 0.9rem;
+
+  a {
+    color: var(--bc-primary);
+  }
+}
+
+/* Upcoming jobs */
+.job-list,
+.bike-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.job {
+  border: 1px solid var(--bc-border);
+  border-left-width: 4px;
+  border-radius: 8px;
+
+  &.job--warn {
+    border-left-color: #d97706;
+    background: rgba(217, 119, 6, 0.04);
+  }
+  &.job--danger {
+    border-left-color: #ea580c;
+    background: rgba(234, 88, 12, 0.04);
+  }
+  &.job--worn {
+    border-left-color: var(--bc-danger);
+    background: rgba(220, 38, 38, 0.05);
+  }
+}
+
+.job-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  text-decoration: none;
+  color: var(--bc-text);
+}
+
+.job-warn {
+  font-size: 1.05rem;
+}
+
+.job-text {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.job-wear {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.job-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--bc-muted);
+  background: var(--bc-bg);
+  border-radius: 999px;
+  padding: 0.12rem 0.5rem;
+}
+
+.job--worn .job-tag {
+  color: var(--bc-danger);
+}
+
+/* Per-bike distance rows */
+.bike-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+  padding: 0.6rem 0;
+
+  & + .bike-row {
+    border-top: 1px solid var(--bc-border);
+  }
+}
+
+.bike-name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--bc-text);
+  font-size: 0.95rem;
+
+  &:hover {
+    color: var(--bc-primary);
+  }
+}
+
+.bike-type {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--bc-muted);
+}
+
+.bike-bar-track {
+  height: 8px;
+  background: var(--bc-bg);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bike-bar {
+  height: 100%;
+  min-width: 2px;
+  background: var(--bc-primary);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.bike-figures {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+
+  .bike-period {
+    font-weight: 600;
+    color: var(--bc-text);
+  }
+
+  .bike-total {
+    color: var(--bc-muted);
+  }
+}

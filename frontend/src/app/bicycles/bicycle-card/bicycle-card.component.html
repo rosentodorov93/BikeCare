@@ -1,4 +1,4 @@
-<a class="card" [routerLink]="['/bicycles', bicycle().id]">
+<a [class]="cardClass()" [routerLink]="['/bicycles', bicycle().id]">
   <div class="card-head">
     <h3 class="card-name">{{ bicycle().name }}</h3>
     <span class="badge">{{ typeLabel() }}</span>
@@ -12,4 +12,18 @@
       <div><dt>Wheels</dt><dd>{{ bicycle().wheelSize }}</dd></div>
     }
   </dl>
+  @if (components().length > 0) {
+    <div class="wear-row">
+      <div class="component-icons">
+        @for (c of components(); track c.id) {
+          <span class="c-icon c-icon--{{ wearLevel(c.wearState) }}" [title]="c.name + ' — ' + c.wearState + '%'">
+            <bc-component-icon [name]="c.name" [size]="18" />
+          </span>
+        }
+      </div>
+      @if (dueCount() > 0) {
+        <span class="due-badge">{{ dueCount() }} due</span>
+      }
+    </div>
+  }
 </a>

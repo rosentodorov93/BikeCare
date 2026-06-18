@@ -1,0 +1,106 @@
+<div class="dashboard">
+  <header class="dash-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="subtitle">How much you're riding, what needs service, and how each bike is doing.</p>
+    </div>
+
+    <div class="period-selector" role="group" aria-label="Select period">
+      @for (p of periods; track p.value) {
+        <button
+          type="button"
+          class="period-btn"
+          [class.active]="period() === p.value"
+          (click)="setPeriod(p.value)"
+        >
+          {{ p.label }}
+        </button>
+      }
+    </div>
+  </header>
+
+  @switch (status()) {
+    @case ('loading') {
+      <p class="state-msg">Loading dashboard…</p>
+    }
+    @case ('error') {
+      <p class="state-msg error">Couldn't load the dashboard. Please try again.</p>
+    }
+    @default {
+      <!-- Stat cards -->
+      <section class="stats-grid">
+        <div class="card stat">
+          <span class="stat-value">{{ stats()?.totalBikes }}</span>
+          <span class="stat-label">Total Bikes</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-value">{{ stats()?.distanceKm }} <small>km</small></span>
+          <span class="stat-label">Distance {{ periodSuffix() }}</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-value">{{ stats()?.activityCount }}</span>
+          <span class="stat-label">Activities {{ periodSuffix() }}</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-value">{{ stats()?.maintenanceEvents }}</span>
+          <span class="stat-label">Maintenance {{ periodSuffix() }}</span>
+        </div>
+      </section>
+
+      <div class="panels">
+        <!-- Upcoming service jobs -->
+        <section class="card panel">
+          <h2>Upcoming service jobs</h2>
+          @if (upcomingJobs().length) {
+            <ul class="job-list">
+              @for (job of upcomingJobs(); track job.componentId) {
+                <li class="job job--{{ wearLevel(job.wearState) }}">
+                  <a class="job-link" [routerLink]="['/bicycles', job.bikeId]">
+                    <span class="job-warn" aria-hidden="true">⚠</span>
+                    <span class="job-text">
+                      <strong>{{ job.componentName }}</strong> on {{ job.bikeName }}
+                    </span>
+                    <span class="job-wear">
+                      {{ job.wearState }}%
+                      <span class="job-tag">{{ job.status === 'overdue' ? 'overdue' : 'due soon' }}</span>
+                    </span>
+                  </a>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="empty">Nothing due — all components are within their service interval. 🎉</p>
+          }
+        </section>
+
+        <!-- Per-bike distance -->
+        <section class="card panel">
+          <h2>Distance by bike</h2>
+          @if (bikes().length) {
+            <ul class="bike-list">
+              @for (bike of bikes(); track bike.id) {
+                <li class="bike-row">
+                  <a class="bike-name" [routerLink]="['/bicycles', bike.id]">
+                    {{ bike.name }}
+                    <span class="bike-type">{{ typeLabel(bike.type) }}</span>
+                  </a>
+                  <div class="bike-bar-track">
+                    <div class="bike-bar" [style.width.%]="barWidth(bike.periodDistanceKm)"></div>
+                  </div>
+                  <div class="bike-figures">
+                    <span class="bike-period">{{ bike.periodDistanceKm }} km</span>
+                    <span class="bike-total">{{ bike.totalDistance }} km total</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="empty">
+              No bikes yet. <a routerLink="/bicycles/new">Add your first bike</a> to get started.
+            </p>
+          }
+        </section>
+      </div>
+    }
+  }
+</div>

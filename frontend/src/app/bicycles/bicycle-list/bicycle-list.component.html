@@ -14,7 +14,7 @@
     @if (bicycles().length > 0) {
       <div class="grid">
         @for (bike of bicycles(); track bike.id) {
-          <bc-bicycle-card [bicycle]="bike" />
+          <bc-bicycle-card [bicycle]="bike" [components]="componentsMap().get(bike.id) ?? []" />
         }
       </div>
     } @else {

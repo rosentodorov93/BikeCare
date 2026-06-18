@@ -18,7 +18,33 @@ function toComponent(row: ComponentRow): Component {
   };
 }
 
+// A component joined with its owning bike, carrying the bike's name and total
+// distance so the dashboard can compute wear across every bike in one query.
+export interface ComponentWithBike extends Component {
+  bikeName: string;
+  bikeTotalDistance: number;
+}
+
 export const componentRepository = {
+  // Every component across all bikes, joined with the owning bike's name and
+  // total distance. Used by the dashboard to flag upcoming service jobs without
+  // an N+1 query per bike.
+  findAllWithBike(): ComponentWithBike[] {
+    const rows = db
+      .prepare(
+        `SELECT c.*, b.name AS bike_name, b.total_distance AS bike_total_distance
+         FROM components c
+         JOIN bicycles b ON b.id = c.bike_id
+         ORDER BY c.rowid`,
+      )
+      .all() as (ComponentRow & { bike_name: string; bike_total_distance: number })[];
+    return rows.map((row) => ({
+      ...toComponent(row),
+      bikeName: row.bike_name,
+      bikeTotalDistance: row.bike_total_distance,
+    }));
+  },
+
   findById(id: string): Component | undefined {
     const row = db.prepare('SELECT * FROM components WHERE id = ?').get(id) as
       | ComponentRow

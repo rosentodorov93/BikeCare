@@ -1,5 +1,7 @@
+import { db } from '../db/connection.js';
 import { bicycleRepository } from '../repositories/bicycles.repository.js';
 import { componentRepository } from '../repositories/components.repository.js';
+import { maintenanceRepository } from '../repositories/maintenance.repository.js';
 import type { Component, ComponentListType } from '../types/component.js';
 import {
   componentNamesForListType,
@@ -53,7 +55,24 @@ export const componentService = {
       throw new ApiError(404, 'COMPONENT_NOT_FOUND', `Component ${componentId} not found`);
     }
 
-    componentRepository.setDistanceAtService(componentId, bike.totalDistance);
+    const now = new Date();
+    // Reset the component and record the service event in one transaction so the
+    // maintenance history stays consistent with the component's fresh baseline.
+    db.transaction(() => {
+      componentRepository.setDistanceAtService(componentId, bike.totalDistance);
+      maintenanceRepository.insert({
+        id: maintenanceRepository.newId(),
+        bikeId,
+        componentId,
+        componentName: component.name,
+        type: 'service',
+        date: now.toISOString().slice(0, 10),
+        distanceAtService: bike.totalDistance,
+        notes: null,
+        createdAt: now.toISOString(),
+      });
+    })();
+
     return {
       ...component,
       distanceAtService: bike.totalDistance,

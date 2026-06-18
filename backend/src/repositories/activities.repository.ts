@@ -38,6 +38,31 @@ export const activityRepository = {
     return row ? toActivity(row) : undefined;
   },
 
+  // Total ridden distance and ride count within a date range (inclusive). ISO
+  // YYYY-MM-DD strings compare correctly lexicographically.
+  statsInRange(from: string, to: string): { distanceKm: number; count: number } {
+    const row = db
+      .prepare(
+        `SELECT COALESCE(SUM(distance_km), 0) AS distance_km, COUNT(*) AS count
+         FROM activities WHERE date >= ? AND date <= ?`,
+      )
+      .get(from, to) as { distance_km: number; count: number };
+    return { distanceKm: row.distance_km, count: row.count };
+  },
+
+  // Distance ridden per bike within a date range. Only bikes with rides in the
+  // range appear; callers default the rest to 0.
+  distanceByBikeInRange(from: string, to: string): { bikeId: string; distanceKm: number }[] {
+    const rows = db
+      .prepare(
+        `SELECT bike_id, SUM(distance_km) AS distance_km
+         FROM activities WHERE date >= ? AND date <= ?
+         GROUP BY bike_id`,
+      )
+      .all(from, to) as { bike_id: string; distance_km: number }[];
+    return rows.map((r) => ({ bikeId: r.bike_id, distanceKm: r.distance_km }));
+  },
+
   insert(activity: { id: string; bikeId: string; date: string; distanceKm: number; createdAt: string }): void {
     db.prepare(
       `INSERT INTO activities (id, bike_id, date, distance_km, created_at)

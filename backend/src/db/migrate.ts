@@ -46,6 +46,21 @@ export function migrate(): void {
     );
 
     CREATE INDEX IF NOT EXISTS idx_activities_bike_id ON activities(bike_id);
+
+    CREATE TABLE IF NOT EXISTS maintenance_records (
+      id                  TEXT PRIMARY KEY,
+      bike_id             TEXT NOT NULL REFERENCES bicycles(id) ON DELETE CASCADE,
+      component_id        TEXT REFERENCES components(id) ON DELETE SET NULL,
+      component_name      TEXT,
+      type                TEXT NOT NULL DEFAULT 'service',
+      date                TEXT NOT NULL,
+      distance_at_service REAL NOT NULL DEFAULT 0,
+      notes               TEXT,
+      created_at          TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_maintenance_bike_id ON maintenance_records(bike_id);
+    CREATE INDEX IF NOT EXISTS idx_maintenance_date ON maintenance_records(date);
   `);
 
   // Bring databases created by the earlier schema up to date.
