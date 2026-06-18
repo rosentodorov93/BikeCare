@@ -8,7 +8,10 @@ import {
   updateBicycle,
   updateBicycleSchema,
 } from '../controllers/bicycles.controller.js';
-import { listComponentsForBike } from '../controllers/components.controller.js';
+import {
+  listComponentsForBike,
+  resetComponentService,
+} from '../controllers/components.controller.js';
 import { validateBody } from '../middleware/validate.js';
 
 export const bicyclesRouter = Router();
@@ -16,6 +19,7 @@ export const bicyclesRouter = Router();
 bicyclesRouter.get('/', listBicycles);
 bicyclesRouter.get('/:id', getBicycle);
 bicyclesRouter.get('/:id/components', listComponentsForBike);
+bicyclesRouter.post('/:id/components/:componentId/reset', resetComponentService);
 bicyclesRouter.post('/', validateBody(createBicycleSchema), createBicycle);
 bicyclesRouter.put('/:id', validateBody(updateBicycleSchema), updateBicycle);
 bicyclesRouter.delete('/:id', deleteBicycle);

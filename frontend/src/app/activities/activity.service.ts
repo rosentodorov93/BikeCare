@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { BikeComponent } from './component.model';
+import { Activity, ActivityPayload } from './activity.model';
 
 // Backend wraps every response in { data } — unwrap it at this boundary so the
 // rest of the app works with plain domain objects.
@@ -10,22 +10,19 @@ interface ApiEnvelope<T> {
 }
 
 @Injectable({ providedIn: 'root' })
-export class ComponentService {
+export class ActivityService {
   private readonly http = inject(HttpClient);
+  private readonly baseUrl = '/api/activities';
 
-  getByBike(bikeId: string): Observable<BikeComponent[]> {
+  getAll(): Observable<Activity[]> {
     return this.http
-      .get<ApiEnvelope<BikeComponent[]>>(`/api/bicycles/${bikeId}/components`)
+      .get<ApiEnvelope<Activity[]>>(this.baseUrl)
       .pipe(map((res) => res.data));
   }
 
-  // Marks a component as serviced/replaced; its wear resets to 0 server-side.
-  resetService(bikeId: string, componentId: string): Observable<BikeComponent> {
+  create(payload: ActivityPayload): Observable<Activity> {
     return this.http
-      .post<ApiEnvelope<BikeComponent>>(
-        `/api/bicycles/${bikeId}/components/${componentId}/reset`,
-        {},
-      )
+      .post<ApiEnvelope<Activity>>(this.baseUrl, payload)
       .pipe(map((res) => res.data));
   }
 }

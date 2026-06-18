@@ -34,6 +34,7 @@ export const bicycleService = {
       purchaseDate: dto.purchaseDate,
       frameSize: dto.frameSize,
       wheelSize: dto.wheelSize,
+      totalDistance: 0,
       createdAt: now,
       updatedAt: now,
     };

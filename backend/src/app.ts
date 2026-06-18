@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import { errorHandler } from './middleware/error-handler.js';
+import { activitiesRouter } from './routes/activities.routes.js';
 import { bicyclesRouter } from './routes/bicycles.routes.js';
 import { ApiError } from './utils/api-response.js';
 
@@ -14,6 +15,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/bicycles', bicyclesRouter);
+app.use('/api/activities', activitiesRouter);
 
 // Unknown /api route -> 404 in the standard envelope.
 app.use('/api', (_req, _res, next) => {

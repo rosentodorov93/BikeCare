@@ -1,0 +1,137 @@
+.head {
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--bc-muted);
+  }
+}
+
+.form {
+  // Wrapping flex (rather than a fixed grid) so the form collapses based on its
+  // own available width — the fixed sidebar makes the content narrower than the
+  // viewport, so viewport media queries alone aren't enough.
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+  max-width: 760px;
+  background: var(--bc-surface);
+  border: 1px solid var(--bc-border);
+  border-radius: var(--bc-radius);
+  padding: 1.5rem;
+
+  .btn {
+    flex: 0 0 auto;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 150px;
+  min-width: 0;
+
+  &.field-bike {
+    flex: 2 1 200px;
+  }
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  input,
+  select {
+    font: inherit;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--bc-border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--bc-text);
+
+    &:focus {
+      outline: none;
+      border-color: var(--bc-primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+  }
+}
+
+.req {
+  color: var(--bc-danger);
+}
+
+.error {
+  color: var(--bc-danger);
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+}
+
+.log {
+  margin-top: 2rem;
+
+  h2 {
+    margin: 0 0 0.85rem;
+    font-size: 1.15rem;
+  }
+}
+
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 760px;
+}
+
+.activity {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  background: var(--bc-surface);
+  border: 1px solid var(--bc-border);
+  border-radius: var(--bc-radius);
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.activity-date {
+  color: var(--bc-muted);
+  font-size: 0.85rem;
+}
+
+.activity-bike {
+  font-weight: 600;
+  text-decoration: none;
+
+  @media (max-width: 480px) {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}
+
+.activity-distance {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.state-msg {
+  color: var(--bc-muted);
+}
+
+.state-error {
+  color: var(--bc-danger);
+}

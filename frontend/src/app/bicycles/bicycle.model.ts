@@ -30,6 +30,7 @@ export interface Bicycle {
   purchaseDate: string | null;
   frameSize: string | null;
   wheelSize: WheelSize | null;
+  totalDistance: number; // total km ridden, accumulated from activities
   createdAt: string;
   updatedAt: string;
 }

@@ -30,6 +30,7 @@
         </div>
         <div><dt>Frame size</dt><dd>{{ bike.frameSize || '—' }}</dd></div>
         <div><dt>Wheel size</dt><dd>{{ bike.wheelSize || '—' }}</dd></div>
+        <div><dt>Distance ridden</dt><dd>{{ bike.totalDistance | number: '1.0-1' }} km</dd></div>
       </dl>
 
       <section class="components">
@@ -37,19 +38,33 @@
         @if (components().length > 0) {
           <ul class="component-list">
             @for (component of components(); track component.id) {
-              <li class="component">
+              <li class="component" [class.is-worn]="component.wearState >= 100">
                 <span class="component-icon"><bc-component-icon [name]="component.name" /></span>
-                <span class="component-name">{{ component.name }}</span>
+                <span class="component-name">
+                  {{ component.name }}
+                  @if (component.wearState >= 100) {
+                    <span class="due-tag">Due</span>
+                  }
+                </span>
                 <span class="wear">
                   <span class="wear-track">
                     <span
                       class="wear-fill"
                       [class]="wearLevel(component.wearState)"
-                      [style.width.%]="component.wearState"
+                      [style.width.%]="component.wearState > 100 ? 100 : component.wearState"
                     ></span>
                   </span>
                   <span class="wear-pct">{{ component.wearState }}%</span>
                 </span>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-reset"
+                  (click)="resetComponent(component)"
+                  [disabled]="resettingId() !== null"
+                  title="Mark as serviced / replaced"
+                >
+                  {{ resettingId() === component.id ? 'Resetting…' : 'Reset' }}
+                </button>
               </li>
             }
           </ul>

@@ -1,10 +1,11 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
 import { Bicycle, bicycleTypeLabel } from '../bicycle.model';
 import { BicycleService } from '../bicycle.service';
+import { BikeComponent } from '../../components/component.model';
 import { ComponentService } from '../../components/component.service';
 import { ComponentIconComponent } from '../../components/component-icon/component-icon.component';
 
@@ -15,7 +16,7 @@ type DetailState =
 
 @Component({
   selector: 'bc-bicycle-detail',
-  imports: [RouterLink, DatePipe, ComponentIconComponent],
+  imports: [RouterLink, DatePipe, DecimalPipe, ComponentIconComponent],
   templateUrl: './bicycle-detail.component.html',
   styleUrl: './bicycle-detail.component.scss',
 })
@@ -28,11 +29,11 @@ export class BicycleDetailComponent {
   protected readonly id = this.route.snapshot.paramMap.get('id') ?? '';
   protected readonly deleting = signal(false);
 
-  // Components load independently of the bike; on error we just show none.
-  protected readonly components = toSignal(
-    this.componentService.getByBike(this.id).pipe(catchError(() => of([]))),
-    { initialValue: [] },
-  );
+  // Components are owned as a writable signal so a service reset updates the
+  // affected row in place. On load error we just show none.
+  protected readonly components = signal<BikeComponent[]>([]);
+  // Id of the component currently being reset, to disable just that button.
+  protected readonly resettingId = signal<string | null>(null);
 
   private readonly state = toSignal(
     this.service.getById(this.id).pipe(
@@ -52,11 +53,40 @@ export class BicycleDetailComponent {
     return b ? bicycleTypeLabel(b.type) : '';
   });
 
+  constructor() {
+    this.componentService
+      .getByBike(this.id)
+      .pipe(catchError(() => of<BikeComponent[]>([])))
+      .subscribe((components) => this.components.set(components));
+  }
+
   // Maps a wear percentage to a severity class used to colour the wear bar.
-  protected wearLevel(wear: number): 'ok' | 'warn' | 'danger' {
+  // At/over 100% the part is due for service/replacement and gets highlighted.
+  protected wearLevel(wear: number): 'ok' | 'warn' | 'danger' | 'worn' {
+    if (wear >= 100) return 'worn';
     if (wear > 80) return 'danger';
     if (wear > 50) return 'warn';
     return 'ok';
+  }
+
+  // Marks a component as serviced/replaced; wear returns to 0.
+  protected resetComponent(component: BikeComponent): void {
+    if (this.resettingId()) return;
+    if (!confirm(`Reset "${component.name}"? This marks it as serviced/replaced.`)) return;
+
+    this.resettingId.set(component.id);
+    this.componentService.resetService(this.id, component.id).subscribe({
+      next: (updated) => {
+        this.components.update((list) =>
+          list.map((c) => (c.id === updated.id ? updated : c)),
+        );
+        this.resettingId.set(null);
+      },
+      error: () => {
+        this.resettingId.set(null);
+        alert('Failed to reset the component. Please try again.');
+      },
+    });
   }
 
   protected confirmDelete(): void {

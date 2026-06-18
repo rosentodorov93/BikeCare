@@ -81,7 +81,7 @@
 
 .component {
   display: grid;
-  grid-template-columns: auto 1fr minmax(140px, 200px);
+  grid-template-columns: auto 1fr minmax(140px, 200px) auto;
   align-items: center;
   gap: 0.85rem;
   padding: 0.75rem 1rem;
@@ -90,8 +90,14 @@
   border-radius: var(--bc-radius);
 
   @media (max-width: 560px) {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
     row-gap: 0.6rem;
+  }
+
+  // A worn-out part (>=100%) is flagged so it stands out in the list.
+  &.is-worn {
+    border-color: var(--bc-danger);
+    background: rgba(220, 38, 38, 0.06);
   }
 }
 
@@ -102,6 +108,20 @@
 
 .component-name {
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.due-tag {
+  background: var(--bc-danger);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .wear {
@@ -137,6 +157,9 @@
   &.danger {
     background: var(--bc-danger);
   }
+  &.worn {
+    background: var(--bc-danger);
+  }
 }
 
 .wear-pct {
@@ -145,6 +168,12 @@
   color: var(--bc-muted);
   min-width: 2.6rem;
   text-align: right;
+}
+
+.btn-reset {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .actions {

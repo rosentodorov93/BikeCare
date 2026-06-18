@@ -15,6 +15,7 @@ function toBicycle(row: BicycleRow): Bicycle {
     purchaseDate: row.purchase_date,
     frameSize: row.frame_size,
     wheelSize: row.wheel_size as Bicycle['wheelSize'],
+    totalDistance: row.total_distance,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -38,8 +39,8 @@ export const bicycleRepository = {
   insert(bicycle: Bicycle): Bicycle {
     db.prepare(
       `INSERT INTO bicycles
-        (id, name, brand, model, type, purchase_date, frame_size, wheel_size, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, brand, model, type, purchase_date, frame_size, wheel_size, total_distance, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       bicycle.id,
       bicycle.name,
@@ -49,6 +50,7 @@ export const bicycleRepository = {
       bicycle.purchaseDate,
       bicycle.frameSize,
       bicycle.wheelSize,
+      bicycle.totalDistance,
       bicycle.createdAt,
       bicycle.updatedAt,
     );
@@ -78,6 +80,13 @@ export const bicycleRepository = {
   deleteById(id: string): boolean {
     const result = db.prepare('DELETE FROM bicycles WHERE id = ?').run(id);
     return result.changes > 0;
+  },
+
+  // Adds ridden distance to the bike's running total and bumps updated_at.
+  addDistance(id: string, distanceKm: number, updatedAt: string): void {
+    db.prepare(
+      'UPDATE bicycles SET total_distance = total_distance + ?, updated_at = ? WHERE id = ?',
+    ).run(distanceKm, updatedAt, id);
   },
 
   newId(): string {

@@ -14,5 +14,7 @@ export interface BikeComponent {
   id: string;
   bikeId: string;
   name: string;
-  wearState: number; // percent 0-100
+  serviceIntervalKm: number; // km between services/replacements
+  distanceAtService: number; // bike's total distance at the last service/reset
+  wearState: number; // computed percent (0 = fresh, >=100 = due/overdue)
 }
