@@ -3,17 +3,20 @@
   position: relative;
   background: var(--bc-surface);
   border: 1px solid var(--bc-border);
-  border-radius: var(--bc-radius);
-  padding: 1.1rem 1.2rem;
+  border-radius: var(--bc-radius-lg);
+  padding: 1.2rem 1.3rem;
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  box-shadow: var(--bc-shadow-sm);
+  transition: box-shadow 0.25s var(--bc-ease), transform 0.25s var(--bc-ease-out),
+    border-color 0.25s var(--bc-ease);
   overflow: hidden;
 }
 
 .card:hover {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  box-shadow: var(--bc-shadow-lg);
+  transform: translateY(-4px);
+  border-color: var(--bc-border-strong);
 }
 
 // Colored left stripe via ::before — no layout impact, no border-width change.
@@ -26,18 +29,23 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 4px;
+  width: 5px;
+  transition: width 0.25s var(--bc-ease);
 }
 
-.card--ok::before    { background: #16a34a; }
-.card--warn::before  { background: #d97706; }
-.card--danger::before { background: #ea580c; }
-.card--worn::before  { background: var(--bc-danger); }
+.card:hover::before {
+  width: 7px;
+}
 
-.card--ok    { background: rgba(22, 163, 74, 0.04); }
-.card--warn  { background: rgba(217, 119, 6, 0.04); }
-.card--danger { background: rgba(234, 88, 12, 0.04); }
-.card--worn  { background: rgba(220, 38, 38, 0.05); }
+.card--ok::before    { background: linear-gradient(180deg, #22c55e, #16a34a); }
+.card--warn::before  { background: linear-gradient(180deg, #f59e0b, #d97706); }
+.card--danger::before { background: linear-gradient(180deg, #fb923c, #ea580c); }
+.card--worn::before  { background: linear-gradient(180deg, #ef4444, #dc2626); }
+
+.card--ok    { background: linear-gradient(135deg, rgba(22, 163, 74, 0.05), transparent 60%); }
+.card--warn  { background: linear-gradient(135deg, rgba(217, 119, 6, 0.05), transparent 60%); }
+.card--danger { background: linear-gradient(135deg, rgba(234, 88, 12, 0.05), transparent 60%); }
+.card--worn  { background: linear-gradient(135deg, rgba(220, 38, 38, 0.06), transparent 60%); }
 
 .card-head {
   display: flex;
@@ -48,16 +56,19 @@
 
 .card-name {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
 }
 
 .badge {
-  background: rgba(37, 99, 235, 0.1);
+  background: var(--bc-gradient-soft);
   color: var(--bc-primary);
+  border: 1px solid rgba(37, 99, 235, 0.15);
   border-radius: 999px;
-  padding: 0.15rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
@@ -102,25 +113,38 @@
 .component-icons {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 5px;
 }
 
 .c-icon {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--bc-surface-2);
+  border: 1px solid var(--bc-border);
+  transition: transform 0.15s var(--bc-ease);
 
-  &.c-icon--ok     { color: #16a34a; }
-  &.c-icon--warn   { color: #d97706; }
-  &.c-icon--danger { color: #ea580c; }
-  &.c-icon--worn   { color: var(--bc-danger); }
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  &.c-icon--ok     { color: #16a34a; background: #ecfdf3; border-color: rgba(22, 163, 74, 0.2); }
+  &.c-icon--warn   { color: #d97706; background: #fff5e8; border-color: rgba(217, 119, 6, 0.2); }
+  &.c-icon--danger { color: #ea580c; background: #fff1e8; border-color: rgba(234, 88, 12, 0.2); }
+  &.c-icon--worn   { color: var(--bc-danger); background: #fef2f2; border-color: rgba(220, 38, 38, 0.2); }
 }
 
 .due-badge {
-  background: var(--bc-danger);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: #fff;
   border-radius: 999px;
-  padding: 0.12rem 0.5rem;
+  padding: 0.18rem 0.6rem;
   font-size: 0.7rem;
   font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: 0 4px 10px -3px rgba(220, 38, 38, 0.5);
 }
