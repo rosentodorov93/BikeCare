@@ -93,19 +93,34 @@
           }
         </section>
 
-        <!-- Per-bike distance -->
+        <!-- Per-bike stats -->
         <section class="card panel">
-          <h2>Distance by bike</h2>
+          <h2>Per-bike overview</h2>
           @if (bikes().length) {
-            <div class="bike-cards">
+            <ul class="bike-rows">
               @for (bike of bikes(); track bike.id) {
-                <bc-bicycle-card
-                  [bicycle]="asBicycle(bike)"
-                  [periodDistanceKm]="bike.periodDistanceKm"
-                  [periodLabel]="periodSuffix()"
-                />
+                <li>
+                  <a class="bike-row" [routerLink]="['/bicycles', bike.id]">
+                    <img class="bike-thumb" [src]="bike.imageUrl || placeholder" (error)="onImageError($event)" alt="" />
+                    <span class="bike-row-info">
+                      <span class="bike-row-name">{{ bike.name }}</span>
+                      <span class="bike-row-badge">{{ typeLabel(bike.type) }}</span>
+                    </span>
+                    <span class="bike-row-metric">
+                      <span class="bike-metric-label">Distance</span>
+                      <span class="bike-stat-period">{{ bike.periodDistanceKm }} <small>km</small></span>
+                      <span class="bike-stat-total">{{ bike.totalDistance }}&nbsp;km total</span>
+                    </span>
+                    <span class="bike-row-divider"></span>
+                    <span class="bike-row-metric">
+                      <span class="bike-metric-label">Services</span>
+                      <span class="bike-stat-period">{{ bike.periodServiceCount }} <small>{{ bike.periodServiceCount === 1 ? 'service' : 'services' }}</small></span>
+                      <span class="bike-stat-total">{{ bike.totalServiceCount }}&nbsp;total</span>
+                    </span>
+                  </a>
+                </li>
               }
-            </div>
+            </ul>
           } @else {
             <p class="empty">
               No bikes yet. <a routerLink="/bicycles/new">Add your first bike</a> to get started.

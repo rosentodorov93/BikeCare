@@ -53,6 +53,36 @@ export const maintenanceRepository = {
     return row.count;
   },
 
+  // Per-bike service counts within a date range, for bikes owned by this user.
+  countByBikeInRangeForUser(
+    userId: string,
+    from: string,
+    to: string,
+  ): { bikeId: string; count: number }[] {
+    return db
+      .prepare(
+        `SELECT m.bike_id AS bikeId, COUNT(*) AS count
+         FROM maintenance_records m
+         JOIN bicycles b ON b.id = m.bike_id
+         WHERE b.user_id = ? AND m.date >= ? AND m.date <= ?
+         GROUP BY m.bike_id`,
+      )
+      .all(userId, from, to) as { bikeId: string; count: number }[];
+  },
+
+  // All-time per-bike service counts for bikes owned by this user.
+  countTotalByBikeForUser(userId: string): { bikeId: string; count: number }[] {
+    return db
+      .prepare(
+        `SELECT m.bike_id AS bikeId, COUNT(*) AS count
+         FROM maintenance_records m
+         JOIN bicycles b ON b.id = m.bike_id
+         WHERE b.user_id = ?
+         GROUP BY m.bike_id`,
+      )
+      .all(userId) as { bikeId: string; count: number }[];
+  },
+
   newId(): string {
     return randomUUID();
   },

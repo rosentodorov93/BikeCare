@@ -28,6 +28,8 @@ export interface BikeDistance {
   imageUrl: string | null; // optional bike photo (base64 data URL)
   periodDistanceKm: number; // distance ridden within the selected period
   totalDistance: number; // all-time accumulated distance
+  periodServiceCount: number; // maintenance records logged within the selected period
+  totalServiceCount: number; // all-time maintenance records
 }
 
 export interface DashboardData {

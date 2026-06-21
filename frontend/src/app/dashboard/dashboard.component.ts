@@ -3,9 +3,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { bicycleTypeLabel, DEFAULT_BIKE_IMAGE } from '../bicycles/bicycle.model';
-import type { Bicycle, BicycleType } from '../bicycles/bicycle.model';
-import { BicycleCardComponent } from '../bicycles/bicycle-card/bicycle-card.component';
-import type { BikeDistance } from './dashboard.model';
+import type { BicycleType } from '../bicycles/bicycle.model';
 import { DashboardService } from './dashboard.service';
 import {
   DASHBOARD_PERIODS,
@@ -24,7 +22,7 @@ type DashboardState =
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, BicycleCardComponent],
+  imports: [RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -68,11 +66,6 @@ export class DashboardComponent {
     () => this.periods.find((p) => p.value === this.period())?.suffix ?? '',
   );
 
-  // Largest period distance, used to scale the per-bike bars.
-  protected readonly maxPeriodDistance = computed(() =>
-    Math.max(0, ...this.bikes().map((b) => b.periodDistanceKm)),
-  );
-
   protected setPeriod(period: DashboardPeriod): void {
     this.period.set(period);
   }
@@ -87,14 +80,5 @@ export class DashboardComponent {
     return 'warn';
   }
 
-  protected barWidth(distance: number): number {
-    const max = this.maxPeriodDistance();
-    if (max <= 0) return 0;
-    return Math.round((distance / max) * 100);
-  }
-
-  // BikeDistance shares the subset of Bicycle fields the card template uses.
-  protected asBicycle(bike: BikeDistance): Bicycle {
-    return bike as unknown as Bicycle;
-  }
 }
+

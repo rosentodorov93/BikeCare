@@ -84,13 +84,25 @@ export const dashboardService = {
       .filter((job) => job.wearState >= UPCOMING_JOB_THRESHOLD)
       .sort((a, b) => b.wearState - a.wearState);
 
-    // Per-bike distance: period distance (default 0) plus all-time total, most
-    // ridden in the period first.
+    // Per-bike distance: period distance (default 0) plus all-time total.
     const periodByBike = new Map(
       activityRepository
         .distanceByBikeInRangeForUser(userId, range.from, range.to)
         .map((r) => [r.bikeId, r.distanceKm]),
     );
+
+    // Per-bike service counts: period and all-time.
+    const periodServicesByBike = new Map(
+      maintenanceRepository
+        .countByBikeInRangeForUser(userId, range.from, range.to)
+        .map((r) => [r.bikeId, r.count]),
+    );
+    const totalServicesByBike = new Map(
+      maintenanceRepository
+        .countTotalByBikeForUser(userId)
+        .map((r) => [r.bikeId, r.count]),
+    );
+
     const bikeDistances: BikeDistance[] = bikes
       .map((bike) => ({
         id: bike.id,
@@ -99,8 +111,10 @@ export const dashboardService = {
         imageUrl: bike.imageUrl,
         periodDistanceKm: periodByBike.get(bike.id) ?? 0,
         totalDistance: bike.totalDistance,
+        periodServiceCount: periodServicesByBike.get(bike.id) ?? 0,
+        totalServiceCount: totalServicesByBike.get(bike.id) ?? 0,
       }))
-      .sort((a, b) => b.periodDistanceKm - a.periodDistanceKm);
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     return {
       period,

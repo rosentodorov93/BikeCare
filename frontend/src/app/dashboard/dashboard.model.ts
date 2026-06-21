@@ -33,6 +33,8 @@ export interface BikeDistance {
   imageUrl: string | null;
   periodDistanceKm: number;
   totalDistance: number;
+  periodServiceCount: number;
+  totalServiceCount: number;
 }
 
 export interface DashboardData {
