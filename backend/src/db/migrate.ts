@@ -77,6 +77,9 @@ export function migrate(): void {
   addColumnIfMissing('components', 'service_interval_km', 'REAL NOT NULL DEFAULT 3000');
   addColumnIfMissing('components', 'distance_at_service', 'REAL NOT NULL DEFAULT 0');
 
+  // Optional bike photo, stored as a base64 data URL. Nullable: no image by default.
+  addColumnIfMissing('bicycles', 'image_url', 'TEXT');
+
   // Nullable because SQLite can't add a NOT NULL column without a default to a
   // non-empty table, and there's no sensible default owner for pre-existing rows.
   // Bikes with user_id = NULL predate auth and become inaccessible to every

@@ -20,6 +20,13 @@
         <span class="badge">{{ typeLabel() }}</span>
       </div>
 
+      <img
+        class="hero-photo"
+        [src]="bike.imageUrl || placeholder"
+        (error)="onImageError($event)"
+        [alt]="bike.name + ' photo'"
+      />
+
       <dl class="spec">
         <div><dt>Brand</dt><dd>{{ bike.brand }}</dd></div>
         <div><dt>Model</dt><dd>{{ bike.model }}</dd></div>

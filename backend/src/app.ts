@@ -11,7 +11,8 @@ import { ApiError } from './utils/api-response.js';
 export const app = express();
 
 app.use(cors());
-app.use(express.json());
+// Raised from the 100kb default so downscaled image data URLs fit in the body.
+app.use(express.json({ limit: '5mb' }));
 
 app.get('/api/health', (_req, res) => {
   res.json({ data: { status: 'ok' } });

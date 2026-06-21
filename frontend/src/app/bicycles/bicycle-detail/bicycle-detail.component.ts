@@ -3,7 +3,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
-import { Bicycle, bicycleTypeLabel } from '../bicycle.model';
+import { Bicycle, bicycleTypeLabel, DEFAULT_BIKE_IMAGE } from '../bicycle.model';
 import { BicycleService } from '../bicycle.service';
 import { BikeComponent } from '../../components/component.model';
 import { ComponentService } from '../../components/component.service';
@@ -28,6 +28,11 @@ export class BicycleDetailComponent {
 
   protected readonly id = this.route.snapshot.paramMap.get('id') ?? '';
   protected readonly deleting = signal(false);
+  protected readonly placeholder = DEFAULT_BIKE_IMAGE;
+
+  protected onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = this.placeholder;
+  }
 
   // Components are owned as a writable signal so a service reset updates the
   // affected row in place. On load error we just show none.

@@ -13,6 +13,7 @@ const mockBicycle: Bicycle = {
   purchaseDate: null,
   frameSize: null,
   wheelSize: '700c',
+  imageUrl: null,
   totalDistance: 500,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
@@ -55,6 +56,24 @@ describe('BicycleCardComponent', () => {
       fixture.componentRef.setInput('bicycle', { ...mockBicycle, type: 'mountain' });
       fixture.detectChanges();
       expect((component as any).typeLabel()).toBe('Mountain');
+    });
+  });
+
+  describe('photo', () => {
+    it('shows the placeholder image when the bike has no photo', () => {
+      const img: HTMLImageElement = fixture.nativeElement.querySelector('.card-photo');
+      expect(img).toBeTruthy();
+      expect(img.getAttribute('src')).toBe('/images/bike-placeholder.svg');
+    });
+
+    it('shows the uploaded photo when imageUrl is set', () => {
+      fixture.componentRef.setInput('bicycle', {
+        ...mockBicycle,
+        imageUrl: 'data:image/jpeg;base64,abc',
+      });
+      fixture.detectChanges();
+      const img: HTMLImageElement = fixture.nativeElement.querySelector('.card-photo');
+      expect(img.getAttribute('src')).toBe('data:image/jpeg;base64,abc');
     });
   });
 
@@ -141,6 +160,36 @@ describe('BicycleCardComponent', () => {
       fixture.componentRef.setInput('components', [makeComponent(100)]);
       fixture.detectChanges();
       expect((component as any).cardClass()).toBe('card card--worn');
+    });
+  });
+
+  describe('distance row', () => {
+    it('should not render .dist-row when periodDistanceKm is not provided', () => {
+      const row: HTMLElement | null = fixture.nativeElement.querySelector('.dist-row');
+      expect(row).toBeNull();
+    });
+
+    it('should render .dist-row when periodDistanceKm is set', () => {
+      fixture.componentRef.setInput('periodDistanceKm', 42);
+      fixture.detectChanges();
+      const row: HTMLElement | null = fixture.nativeElement.querySelector('.dist-row');
+      expect(row).toBeTruthy();
+    });
+
+    it('should display the period distance value and label', () => {
+      fixture.componentRef.setInput('periodDistanceKm', 120);
+      fixture.componentRef.setInput('periodLabel', 'This Month');
+      fixture.detectChanges();
+      const text: string = fixture.nativeElement.querySelector('.dist-row').textContent;
+      expect(text).toContain('120');
+      expect(text).toContain('This Month');
+    });
+
+    it('should display bicycle().totalDistance in the dist-row', () => {
+      fixture.componentRef.setInput('periodDistanceKm', 10);
+      fixture.detectChanges();
+      const text: string = fixture.nativeElement.querySelector('.dist-row').textContent;
+      expect(text).toContain('500'); // mockBicycle.totalDistance = 500
     });
   });
 });

@@ -2,8 +2,10 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap } from 'rxjs';
-import { bicycleTypeLabel } from '../bicycles/bicycle.model';
-import type { BicycleType } from '../bicycles/bicycle.model';
+import { bicycleTypeLabel, DEFAULT_BIKE_IMAGE } from '../bicycles/bicycle.model';
+import type { Bicycle, BicycleType } from '../bicycles/bicycle.model';
+import { BicycleCardComponent } from '../bicycles/bicycle-card/bicycle-card.component';
+import type { BikeDistance } from './dashboard.model';
 import { DashboardService } from './dashboard.service';
 import {
   DASHBOARD_PERIODS,
@@ -22,7 +24,7 @@ type DashboardState =
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, BicycleCardComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -31,6 +33,11 @@ export class DashboardComponent {
 
   protected readonly periods = DASHBOARD_PERIODS;
   protected readonly period = signal<DashboardPeriod>('month');
+  protected readonly placeholder = DEFAULT_BIKE_IMAGE;
+
+  protected onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = this.placeholder;
+  }
 
   // Refetch whenever the selected period changes.
   private readonly state = toSignal(
@@ -84,5 +91,10 @@ export class DashboardComponent {
     const max = this.maxPeriodDistance();
     if (max <= 0) return 0;
     return Math.round((distance / max) * 100);
+  }
+
+  // BikeDistance shares the subset of Bicycle fields the card template uses.
+  protected asBicycle(bike: BikeDistance): Bicycle {
+    return bike as unknown as Bicycle;
   }
 }

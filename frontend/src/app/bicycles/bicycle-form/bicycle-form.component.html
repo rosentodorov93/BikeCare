@@ -7,6 +7,26 @@
 } @else {
   <form class="form" [formGroup]="form" (ngSubmit)="submit()">
     <div class="field">
+      <label>Photo</label>
+      <div class="photo-field">
+        <img class="photo-preview" [src]="imageUrl() || placeholder" alt="Bike photo preview" />
+        <div class="photo-controls">
+          <label class="btn btn-secondary photo-pick">
+            {{ imageUrl() ? 'Change photo' : 'Upload photo' }}
+            <input type="file" accept="image/*" (change)="onImageSelected($event)" hidden />
+          </label>
+          @if (imageUrl()) {
+            <button type="button" class="photo-remove" (click)="clearImage()">Remove photo</button>
+          }
+          <small class="hint">Optional. A default image is shown if you don't add one.</small>
+          @if (imageError()) {
+            <small class="error">{{ imageError() }}</small>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
       <label for="name">Name <span class="req">*</span></label>
       <input id="name" type="text" formControlName="name" placeholder="e.g. Weekend Roadie" />
       @if (form.controls.name.touched && form.controls.name.invalid) {

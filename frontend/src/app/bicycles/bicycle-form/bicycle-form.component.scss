@@ -73,6 +73,48 @@ h1 {
   }
 }
 
+.photo-field {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.photo-preview {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: var(--bc-radius-sm);
+  border: 1px solid var(--bc-border);
+  background: var(--bc-bg, #f1f5f9);
+  flex-shrink: 0;
+}
+
+.photo-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.photo-pick {
+  cursor: pointer;
+  margin: 0;
+}
+
+.photo-remove {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--bc-danger);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .req {
   color: var(--bc-danger);
 }

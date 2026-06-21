@@ -48,6 +48,18 @@
   white-space: nowrap;
 }
 
+.hero-photo {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  margin-top: 1.5rem;
+  border-radius: var(--bc-radius-lg);
+  border: 1px solid var(--bc-border);
+  box-shadow: var(--bc-shadow-sm);
+  background: var(--bc-surface-2);
+}
+
 .spec {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

@@ -30,6 +30,7 @@ export interface BikeDistance {
   id: string;
   name: string;
   type: string;
+  imageUrl: string | null;
   periodDistanceKm: number;
   totalDistance: number;
 }

@@ -16,6 +16,7 @@ const mockBicycle: Bicycle = {
   purchaseDate: '2024-01-15',
   frameSize: '56cm',
   wheelSize: '700c',
+  imageUrl: null,
   totalDistance: 1200,
   createdAt: '2024-01-15T00:00:00.000Z',
   updatedAt: '2026-06-01T00:00:00.000Z',
@@ -99,6 +100,26 @@ describe('BicycleDetailComponent', () => {
     // toSignal resolves synchronously for synchronous observables, so bicycle
     // is available immediately after createComponent.
     expect((component as any).bicycle()).toBeTruthy();
+  });
+
+  describe('hero photo', () => {
+    it('renders the placeholder when the bike has no photo', fakeAsync(() => {
+      fixture.detectChanges();
+      tick(0);
+      fixture.detectChanges();
+      const img: HTMLImageElement = fixture.nativeElement.querySelector('.hero-photo');
+      expect(img.getAttribute('src')).toBe('/images/bike-placeholder.svg');
+    }));
+
+    it('renders the uploaded photo when imageUrl is set', fakeAsync(() => {
+      bicycleSpy.getById.and.returnValue(of({ ...mockBicycle, imageUrl: 'data:image/png;base64,xyz' }));
+      const f = TestBed.createComponent(BicycleDetailComponent);
+      f.detectChanges();
+      tick(0);
+      f.detectChanges();
+      const img: HTMLImageElement = f.nativeElement.querySelector('.hero-photo');
+      expect(img.getAttribute('src')).toBe('data:image/png;base64,xyz');
+    }));
   });
 
   describe('wearLevel()', () => {

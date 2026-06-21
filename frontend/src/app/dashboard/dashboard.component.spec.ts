@@ -11,8 +11,8 @@ const mockData: DashboardData = {
   stats: { totalBikes: 2, distanceKm: 150, activityCount: 10, maintenanceEvents: 1 },
   upcomingJobs: [],
   bikes: [
-    { id: '1', name: 'Road Bike', type: 'road', periodDistanceKm: 100, totalDistance: 1000 },
-    { id: '2', name: 'MTB', type: 'mountain', periodDistanceKm: 50, totalDistance: 500 },
+    { id: '1', name: 'Road Bike', type: 'road', imageUrl: null, periodDistanceKm: 100, totalDistance: 1000 },
+    { id: '2', name: 'MTB', type: 'mountain', imageUrl: null, periodDistanceKm: 50, totalDistance: 500 },
   ],
 };
 
@@ -72,6 +72,50 @@ describe('DashboardComponent', () => {
     fixture.detectChanges();
     expect((component as any).bikes()).toEqual(mockData.bikes);
   }));
+
+  it('renders a card photo per bike, using the placeholder when no photo is set', fakeAsync(() => {
+    fixture.detectChanges();
+    tick(0);
+    fixture.detectChanges();
+    const photos: HTMLImageElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('.card-photo'),
+    );
+    expect(photos.length).toBe(2);
+    expect(photos[0].getAttribute('src')).toBe('/images/bike-placeholder.svg');
+  }));
+
+  it('uses the uploaded photo for a bike that has an imageUrl', fakeAsync(() => {
+    serviceSpy.get.and.returnValue(
+      of({
+        ...mockData,
+        bikes: [{ ...mockData.bikes[0], imageUrl: 'data:image/jpeg;base64,abc' }],
+      }),
+    );
+    const f = TestBed.createComponent(DashboardComponent);
+    f.detectChanges();
+    tick(0);
+    f.detectChanges();
+    const photo: HTMLImageElement = f.nativeElement.querySelector('.card-photo');
+    expect(photo.getAttribute('src')).toBe('data:image/jpeg;base64,abc');
+  }));
+
+  it('renders period distance and total distance on each bike card', fakeAsync(() => {
+    fixture.detectChanges();
+    tick(0);
+    fixture.detectChanges();
+    const rows: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.dist-row'));
+    expect(rows.length).toBe(2);
+    expect(rows[0].textContent).toContain('100'); // Road Bike periodDistanceKm
+    expect(rows[0].textContent).toContain('1000'); // Road Bike totalDistance
+    expect(rows[1].textContent).toContain('50'); // MTB periodDistanceKm
+    expect(rows[1].textContent).toContain('500'); // MTB totalDistance
+  }));
+
+  it('asBicycle() returns the same object reference cast as Bicycle', () => {
+    const bike = mockData.bikes[0];
+    const result = (component as any).asBicycle(bike);
+    expect(result).toBe(bike as any);
+  });
 
   it('should be in loading state while awaiting service response', () => {
     const subject = new Subject<DashboardData>();

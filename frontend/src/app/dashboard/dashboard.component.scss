@@ -262,77 +262,9 @@
   color: var(--bc-danger);
 }
 
-/* Per-bike distance rows */
-.bike-row {
+/* Per-bike distance cards */
+.bike-cards {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.35rem;
-  padding: 0.6rem 0;
-
-  & + .bike-row {
-    border-top: 1px solid var(--bc-border);
-  }
-}
-
-.bike-name {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  font-weight: 600;
-  text-decoration: none;
-  color: var(--bc-text);
-  font-size: 0.95rem;
-
-  &:hover {
-    color: var(--bc-primary);
-  }
-}
-
-.bike-type {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--bc-muted);
-}
-
-.bike-bar-track {
-  height: 9px;
-  background: var(--bc-bg);
-  border-radius: 999px;
-  overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.06);
-}
-
-.bike-bar {
-  position: relative;
-  height: 100%;
-  min-width: 2px;
-  background: var(--bc-gradient);
-  border-radius: 999px;
-  transition: width 0.6s var(--bc-ease-out);
-  overflow: hidden;
-
-  /* Sheen sweep on the filled bar */
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-    animation: bc-shimmer 2.4s var(--bc-ease) 0.6s infinite;
-  }
-}
-
-.bike-figures {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.8rem;
-
-  .bike-period {
-    font-weight: 600;
-    color: var(--bc-text);
-  }
-
-  .bike-total {
-    color: var(--bc-muted);
-  }
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.85rem;
 }

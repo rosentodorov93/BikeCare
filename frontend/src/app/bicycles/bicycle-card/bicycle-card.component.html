@@ -1,4 +1,10 @@
 <a [class]="cardClass()" [routerLink]="['/bicycles', bicycle().id]">
+  <img
+    class="card-photo"
+    [src]="bicycle().imageUrl || placeholder"
+    (error)="onImageError($event)"
+    alt=""
+  />
   <div class="card-head">
     <h3 class="card-name">{{ bicycle().name }}</h3>
     <span class="badge">{{ typeLabel() }}</span>
@@ -12,6 +18,19 @@
       <div><dt>Wheels</dt><dd>{{ bicycle().wheelSize }}</dd></div>
     }
   </dl>
+  @if (periodDistanceKm() !== null) {
+    <div class="dist-row">
+      <div class="dist-stat">
+        <span class="dist-value">{{ periodDistanceKm() }}</span>
+        <span class="dist-label">km {{ periodLabel() }}</span>
+      </div>
+      <div class="dist-divider"></div>
+      <div class="dist-stat dist-stat--muted">
+        <span class="dist-value">{{ bicycle().totalDistance }}</span>
+        <span class="dist-label">km total</span>
+      </div>
+    </div>
+  }
   @if (components().length > 0) {
     <div class="wear-row">
       <div class="component-icons">

@@ -47,6 +47,18 @@
 .card--danger { background: linear-gradient(135deg, rgba(234, 88, 12, 0.05), transparent 60%); }
 .card--worn  { background: linear-gradient(135deg, rgba(220, 38, 38, 0.06), transparent 60%); }
 
+// Full-bleed banner photo at the top of the card. Negative margins cancel the
+// card padding so the image meets the rounded top corners; fixed aspect ratio
+// keeps every card the same height whether or not a photo was uploaded.
+.card-photo {
+  display: block;
+  width: calc(100% + 2.6rem);
+  margin: -1.2rem -1.3rem 1rem;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--bc-surface-2);
+}
+
 .card-head {
   display: flex;
   align-items: center;
@@ -98,6 +110,50 @@
     margin: 0;
     font-weight: 600;
   }
+}
+
+.dist-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bc-border);
+}
+
+.dist-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.dist-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--bc-text);
+}
+
+.dist-stat--muted .dist-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bc-muted);
+}
+
+.dist-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bc-muted);
+}
+
+.dist-divider {
+  width: 1px;
+  height: 2rem;
+  background: var(--bc-border);
+  flex-shrink: 0;
 }
 
 .wear-row {

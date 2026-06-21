@@ -40,6 +40,7 @@ const sampleBike: Bicycle = {
   purchaseDate: null,
   frameSize: null,
   wheelSize: null,
+  imageUrl: null,
   totalDistance: 500,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',

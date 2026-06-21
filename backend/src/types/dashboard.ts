@@ -25,6 +25,7 @@ export interface BikeDistance {
   id: string;
   name: string;
   type: string;
+  imageUrl: string | null; // optional bike photo (base64 data URL)
   periodDistanceKm: number; // distance ridden within the selected period
   totalDistance: number; // all-time accumulated distance
 }

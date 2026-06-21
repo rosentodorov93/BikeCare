@@ -16,6 +16,7 @@ const makeBicycle = (id: string): Bicycle => ({
   purchaseDate: null,
   frameSize: null,
   wheelSize: null,
+  imageUrl: null,
   totalDistance: 0,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',

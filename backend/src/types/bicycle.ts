@@ -28,6 +28,7 @@ export interface Bicycle {
   purchaseDate: string | null; // ISO date (YYYY-MM-DD)
   frameSize: string | null;
   wheelSize: WheelSize | null;
+  imageUrl: string | null; // optional photo, stored as a base64 data URL
   totalDistance: number; // total km ridden, accumulated from activities
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
@@ -44,6 +45,7 @@ export interface BicycleRow {
   purchase_date: string | null;
   frame_size: string | null;
   wheel_size: string | null;
+  image_url: string | null;
   total_distance: number;
   created_at: string;
   updated_at: string;

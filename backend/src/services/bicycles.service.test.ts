@@ -43,6 +43,7 @@ const sampleBike: Bicycle = {
   purchaseDate: '2023-01-15',
   frameSize: 'M',
   wheelSize: '700c',
+  imageUrl: null,
   totalDistance: 0,
   createdAt: '2023-01-15T10:00:00.000Z',
   updatedAt: '2023-01-15T10:00:00.000Z',
@@ -56,6 +57,7 @@ const createDto: CreateBicycleDto = {
   purchaseDate: '2023-01-15',
   frameSize: 'M',
   wheelSize: '700c',
+  imageUrl: null,
   componentListType: 'no_suspension',
 };
 
@@ -67,6 +69,7 @@ const updateDto: UpdateBicycleDto = {
   purchaseDate: '2023-01-15',
   frameSize: 'M',
   wheelSize: '700c',
+  imageUrl: null,
 };
 
 beforeEach(() => {
@@ -127,6 +130,31 @@ describe('bicycleService.create', () => {
     expect(result.id).toBe('new-uuid');
   });
 
+  it('passes the supplied image data URL through to the persisted bike', async () => {
+    vi.mocked(bicycleRepository.newId).mockReturnValue('new-uuid');
+    vi.mocked(componentService.buildForBike).mockReturnValue([]);
+    vi.mocked(bicycleRepository.findById).mockReturnValue({ ...sampleBike, id: 'new-uuid' });
+
+    const dataUrl = 'data:image/jpeg;base64,abc123';
+    await bicycleService.create({ ...createDto, imageUrl: dataUrl }, userId);
+
+    expect(bicycleRepository.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ imageUrl: dataUrl }),
+    );
+  });
+
+  it('stores null when no image is provided', async () => {
+    vi.mocked(bicycleRepository.newId).mockReturnValue('new-uuid');
+    vi.mocked(componentService.buildForBike).mockReturnValue([]);
+    vi.mocked(bicycleRepository.findById).mockReturnValue({ ...sampleBike, id: 'new-uuid' });
+
+    await bicycleService.create(createDto, userId);
+
+    expect(bicycleRepository.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ imageUrl: null }),
+    );
+  });
+
   it('sets totalDistance to 0 on creation', async () => {
     vi.mocked(bicycleRepository.newId).mockReturnValue('new-uuid');
     vi.mocked(componentService.buildForBike).mockReturnValue([]);
@@ -158,6 +186,15 @@ describe('bicycleService.update', () => {
     const result = await bicycleService.update('bike-1', updateDto, userId);
     expect(result.id).toBe('bike-1');
     expect(result.totalDistance).toBe(1500);
+  });
+
+  it('updates the image data URL on the existing bike', async () => {
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(sampleBike);
+    vi.mocked(bicycleRepository.update).mockImplementation((b) => b);
+
+    const dataUrl = 'data:image/png;base64,zzz';
+    const result = await bicycleService.update('bike-1', { ...updateDto, imageUrl: dataUrl }, userId);
+    expect(result.imageUrl).toBe(dataUrl);
   });
 
   it('throws ApiError(404) when bicycle is not found', async () => {

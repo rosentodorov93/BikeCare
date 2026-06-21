@@ -16,6 +16,7 @@ function toBicycle(row: BicycleRow): Bicycle {
     purchaseDate: row.purchase_date,
     frameSize: row.frame_size,
     wheelSize: row.wheel_size as Bicycle['wheelSize'],
+    imageUrl: row.image_url,
     totalDistance: row.total_distance,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -50,8 +51,8 @@ export const bicycleRepository = {
   insert(bicycle: Bicycle): Bicycle {
     db.prepare(
       `INSERT INTO bicycles
-        (id, user_id, name, brand, model, type, purchase_date, frame_size, wheel_size, total_distance, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, user_id, name, brand, model, type, purchase_date, frame_size, wheel_size, image_url, total_distance, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       bicycle.id,
       bicycle.userId,
@@ -62,6 +63,7 @@ export const bicycleRepository = {
       bicycle.purchaseDate,
       bicycle.frameSize,
       bicycle.wheelSize,
+      bicycle.imageUrl,
       bicycle.totalDistance,
       bicycle.createdAt,
       bicycle.updatedAt,
@@ -73,7 +75,7 @@ export const bicycleRepository = {
     db.prepare(
       `UPDATE bicycles SET
         name = ?, brand = ?, model = ?, type = ?, purchase_date = ?,
-        frame_size = ?, wheel_size = ?, updated_at = ?
+        frame_size = ?, wheel_size = ?, image_url = ?, updated_at = ?
        WHERE id = ?`,
     ).run(
       bicycle.name,
@@ -83,6 +85,7 @@ export const bicycleRepository = {
       bicycle.purchaseDate,
       bicycle.frameSize,
       bicycle.wheelSize,
+      bicycle.imageUrl,
       bicycle.updatedAt,
       bicycle.id,
     );

@@ -18,6 +18,9 @@ export const WHEEL_SIZES = ['26"', '27.5"', '29"', '700c', '650b', 'other'] as c
 
 export type WheelSize = (typeof WHEEL_SIZES)[number];
 
+// Shown wherever a bike has no uploaded photo. Served from public/images.
+export const DEFAULT_BIKE_IMAGE = '/images/bike-placeholder.svg';
+
 export type { ComponentListType } from '../components/component.model';
 import type { ComponentListType } from '../components/component.model';
 
@@ -30,6 +33,7 @@ export interface Bicycle {
   purchaseDate: string | null;
   frameSize: string | null;
   wheelSize: WheelSize | null;
+  imageUrl: string | null; // optional photo, stored as a base64 data URL
   totalDistance: number; // total km ridden, accumulated from activities
   createdAt: string;
   updatedAt: string;
@@ -44,6 +48,7 @@ export interface BicyclePayload {
   purchaseDate: string | null;
   frameSize: string | null;
   wheelSize: WheelSize | null;
+  imageUrl?: string | null; // base64 data URL, or null to clear
   // Only sent on create — it seeds the bike's components. Edits omit it so the
   // existing components (and their wear) are left untouched.
   componentListType?: ComponentListType;

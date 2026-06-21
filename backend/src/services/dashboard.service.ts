@@ -96,6 +96,7 @@ export const dashboardService = {
         id: bike.id,
         name: bike.name,
         type: bike.type,
+        imageUrl: bike.imageUrl,
         periodDistanceKm: periodByBike.get(bike.id) ?? 0,
         totalDistance: bike.totalDistance,
       }))

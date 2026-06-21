@@ -36,6 +36,7 @@ export const bicycleService = {
       purchaseDate: dto.purchaseDate,
       frameSize: dto.frameSize,
       wheelSize: dto.wheelSize,
+      imageUrl: dto.imageUrl,
       totalDistance: 0,
       createdAt: now,
       updatedAt: now,
@@ -64,6 +65,7 @@ export const bicycleService = {
       purchaseDate: dto.purchaseDate,
       frameSize: dto.frameSize,
       wheelSize: dto.wheelSize,
+      imageUrl: dto.imageUrl,
       updatedAt: new Date().toISOString(),
     };
     return bicycleRepository.update(updated);

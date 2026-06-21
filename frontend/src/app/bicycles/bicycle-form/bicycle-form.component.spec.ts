@@ -14,6 +14,7 @@ const mockBicycle: Bicycle = {
   purchaseDate: null,
   frameSize: null,
   wheelSize: null,
+  imageUrl: null,
   totalDistance: 0,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
@@ -141,6 +142,45 @@ describe('BicycleFormComponent — create mode', () => {
       expect(payload.brand).toBe('Trek');
       expect(payload.model).toBe('Domane');
     }));
+
+    it('should include the selected image data URL in the payload', fakeAsync(() => {
+      bicycleSpy.create.and.returnValue(of(mockBicycle));
+      (component as any).imageUrl.set('data:image/jpeg;base64,abc');
+      (component as any).form.patchValue({
+        name: 'My Bike',
+        brand: 'Trek',
+        model: 'Domane',
+        type: 'road',
+        componentListType: 'no_suspension',
+      });
+      (component as any).submit();
+      tick();
+
+      const payload = bicycleSpy.create.calls.mostRecent().args[0];
+      expect(payload.imageUrl).toBe('data:image/jpeg;base64,abc');
+    }));
+
+    it('should send imageUrl null when no image is selected', fakeAsync(() => {
+      bicycleSpy.create.and.returnValue(of(mockBicycle));
+      (component as any).form.patchValue({
+        name: 'My Bike',
+        brand: 'Trek',
+        model: 'Domane',
+        type: 'road',
+        componentListType: 'no_suspension',
+      });
+      (component as any).submit();
+      tick();
+
+      const payload = bicycleSpy.create.calls.mostRecent().args[0];
+      expect(payload.imageUrl).toBeNull();
+    }));
+
+    it('clearImage() resets the preview back to no image', () => {
+      (component as any).imageUrl.set('data:image/png;base64,zzz');
+      (component as any).clearImage();
+      expect((component as any).imageUrl()).toBeNull();
+    });
 
     it('should reset submitting flag on error', fakeAsync(() => {
       bicycleSpy.create.and.returnValue(throwError(() => new Error('fail')));

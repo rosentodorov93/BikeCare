@@ -19,6 +19,15 @@ const bicycleFields = {
   purchaseDate: z.preprocess(emptyToNull, z.string().date().nullable().default(null)),
   frameSize: z.preprocess(emptyToNull, z.string().trim().min(1).nullable().default(null)),
   wheelSize: z.preprocess(emptyToNull, z.enum(WHEEL_SIZES).nullable().default(null)),
+  // Optional photo as a base64 data URL (the frontend downscales before encoding).
+  imageUrl: z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .nullable()
+      .default(null)
+      .refine((v) => v === null || v.startsWith('data:image/'), 'must be an image data URL'),
+  ),
 };
 
 // `componentListType` only drives component creation, so it lives on the create

@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Bicycle, bicycleTypeLabel } from '../bicycle.model';
+import { Bicycle, bicycleTypeLabel, DEFAULT_BIKE_IMAGE } from '../bicycle.model';
 import { BikeComponent } from '../../components/component.model';
 import { ComponentIconComponent } from '../../components/component-icon/component-icon.component';
 
@@ -15,8 +15,16 @@ type WearLevel = 'ok' | 'warn' | 'danger' | 'worn';
 export class BicycleCardComponent {
   readonly bicycle = input.required<Bicycle>();
   readonly components = input<BikeComponent[]>([]);
+  readonly periodDistanceKm = input<number | null>(null);
+  readonly periodLabel = input<string>('');
 
+  protected readonly placeholder = DEFAULT_BIKE_IMAGE;
   protected readonly typeLabel = computed(() => bicycleTypeLabel(this.bicycle().type));
+
+  // Fall back to the placeholder if a stored image fails to load.
+  protected onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = this.placeholder;
+  }
 
   protected wearLevel(wear: number): WearLevel {
     if (wear >= 100) return 'worn';

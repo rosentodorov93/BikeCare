@@ -97,23 +97,15 @@
         <section class="card panel">
           <h2>Distance by bike</h2>
           @if (bikes().length) {
-            <ul class="bike-list">
+            <div class="bike-cards">
               @for (bike of bikes(); track bike.id) {
-                <li class="bike-row">
-                  <a class="bike-name" [routerLink]="['/bicycles', bike.id]">
-                    {{ bike.name }}
-                    <span class="bike-type">{{ typeLabel(bike.type) }}</span>
-                  </a>
-                  <div class="bike-bar-track">
-                    <div class="bike-bar" [style.width.%]="barWidth(bike.periodDistanceKm)"></div>
-                  </div>
-                  <div class="bike-figures">
-                    <span class="bike-period">{{ bike.periodDistanceKm }} km</span>
-                    <span class="bike-total">{{ bike.totalDistance }} km total</span>
-                  </div>
-                </li>
+                <bc-bicycle-card
+                  [bicycle]="asBicycle(bike)"
+                  [periodDistanceKm]="bike.periodDistanceKm"
+                  [periodLabel]="periodSuffix()"
+                />
               }
-            </ul>
+            </div>
           } @else {
             <p class="empty">
               No bikes yet. <a routerLink="/bicycles/new">Add your first bike</a> to get started.
