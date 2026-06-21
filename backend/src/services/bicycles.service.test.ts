@@ -6,11 +6,12 @@ vi.mock('../db/connection.js', () => ({
 
 vi.mock('../repositories/bicycles.repository.js', () => ({
   bicycleRepository: {
-    findAll: vi.fn(),
+    findAllByUser: vi.fn(),
     findById: vi.fn(),
+    findByIdForUser: vi.fn(),
     insert: vi.fn(),
     update: vi.fn(),
-    deleteById: vi.fn(),
+    deleteByIdForUser: vi.fn(),
     newId: vi.fn(),
   },
 }));
@@ -30,8 +31,11 @@ import { componentService } from './components.service.js';
 import { bicycleService } from './bicycles.service.js';
 import type { CreateBicycleDto, UpdateBicycleDto } from '../controllers/bicycles.controller.js';
 
+const userId = 'user-1';
+
 const sampleBike: Bicycle = {
   id: 'bike-1',
+  userId,
   name: 'My Road Bike',
   brand: 'Trek',
   model: 'FX3',
@@ -70,25 +74,36 @@ beforeEach(() => {
 });
 
 describe('bicycleService.getAll', () => {
-  it('delegates to the repository and returns all bikes', async () => {
-    vi.mocked(bicycleRepository.findAll).mockReturnValue([sampleBike]);
-    const result = await bicycleService.getAll();
-    expect(bicycleRepository.findAll).toHaveBeenCalledOnce();
+  it('delegates to the repository, scoped to the user, and returns all bikes', async () => {
+    vi.mocked(bicycleRepository.findAllByUser).mockReturnValue([sampleBike]);
+    const result = await bicycleService.getAll(userId);
+    expect(bicycleRepository.findAllByUser).toHaveBeenCalledWith(userId);
     expect(result).toEqual([sampleBike]);
   });
 });
 
 describe('bicycleService.getById', () => {
-  it('returns the bicycle when found', async () => {
-    vi.mocked(bicycleRepository.findById).mockReturnValue(sampleBike);
-    const result = await bicycleService.getById('bike-1');
+  it('returns the bicycle when found and owned by the user', async () => {
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(sampleBike);
+    const result = await bicycleService.getById('bike-1', userId);
+    expect(bicycleRepository.findByIdForUser).toHaveBeenCalledWith('bike-1', userId);
     expect(result).toEqual(sampleBike);
   });
 
   it('throws ApiError(404) when bicycle is not found', async () => {
-    vi.mocked(bicycleRepository.findById).mockReturnValue(undefined);
-    await expect(bicycleService.getById('missing')).rejects.toThrow(ApiError);
-    await expect(bicycleService.getById('missing')).rejects.toMatchObject({
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(undefined);
+    await expect(bicycleService.getById('missing', userId)).rejects.toMatchObject({
+      status: 404,
+      code: 'BICYCLE_NOT_FOUND',
+    });
+  });
+
+  it('throws ApiError(404), not 403, when the bike belongs to another user', async () => {
+    // findByIdForUser returns undefined for a bike that exists but isn't owned
+    // by this user - same not-found behavior as a missing bike, so existence
+    // of another user's bike id is never leaked.
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(undefined);
+    await expect(bicycleService.getById('bike-owned-by-someone-else', userId)).rejects.toMatchObject({
       status: 404,
       code: 'BICYCLE_NOT_FOUND',
     });
@@ -101,10 +116,13 @@ describe('bicycleService.create', () => {
     vi.mocked(componentService.buildForBike).mockReturnValue([]);
     vi.mocked(bicycleRepository.findById).mockReturnValue({ ...sampleBike, id: 'new-uuid' });
 
-    const result = await bicycleService.create(createDto);
+    const result = await bicycleService.create(createDto, userId);
 
     expect(bicycleRepository.newId).toHaveBeenCalledOnce();
     expect(componentService.buildForBike).toHaveBeenCalledWith('new-uuid', 'no_suspension');
+    expect(bicycleRepository.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'new-uuid', userId }),
+    );
     expect(bicycleRepository.findById).toHaveBeenCalledWith('new-uuid');
     expect(result.id).toBe('new-uuid');
   });
@@ -115,35 +133,36 @@ describe('bicycleService.create', () => {
     const freshBike = { ...sampleBike, id: 'new-uuid', totalDistance: 0 };
     vi.mocked(bicycleRepository.findById).mockReturnValue(freshBike);
 
-    const result = await bicycleService.create(createDto);
+    const result = await bicycleService.create(createDto, userId);
     expect(result.totalDistance).toBe(0);
   });
 });
 
 describe('bicycleService.update', () => {
   it('merges new fields onto the existing bike and returns updated', async () => {
-    vi.mocked(bicycleRepository.findById).mockReturnValue(sampleBike);
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(sampleBike);
     const updatedBike = { ...sampleBike, name: 'Updated Bike' };
     vi.mocked(bicycleRepository.update).mockReturnValue(updatedBike);
 
-    const result = await bicycleService.update('bike-1', updateDto);
+    const result = await bicycleService.update('bike-1', updateDto, userId);
+    expect(bicycleRepository.findByIdForUser).toHaveBeenCalledWith('bike-1', userId);
     expect(bicycleRepository.update).toHaveBeenCalledOnce();
     expect(result.name).toBe('Updated Bike');
   });
 
   it('preserves id and totalDistance', async () => {
     const existing = { ...sampleBike, totalDistance: 1500 };
-    vi.mocked(bicycleRepository.findById).mockReturnValue(existing);
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(existing);
     vi.mocked(bicycleRepository.update).mockImplementation((b) => b);
 
-    const result = await bicycleService.update('bike-1', updateDto);
+    const result = await bicycleService.update('bike-1', updateDto, userId);
     expect(result.id).toBe('bike-1');
     expect(result.totalDistance).toBe(1500);
   });
 
   it('throws ApiError(404) when bicycle is not found', async () => {
-    vi.mocked(bicycleRepository.findById).mockReturnValue(undefined);
-    await expect(bicycleService.update('missing', updateDto)).rejects.toMatchObject({
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(undefined);
+    await expect(bicycleService.update('missing', updateDto, userId)).rejects.toMatchObject({
       status: 404,
       code: 'BICYCLE_NOT_FOUND',
     });
@@ -151,15 +170,15 @@ describe('bicycleService.update', () => {
 });
 
 describe('bicycleService.remove', () => {
-  it('calls deleteById and resolves on success', async () => {
-    vi.mocked(bicycleRepository.deleteById).mockReturnValue(true);
-    await expect(bicycleService.remove('bike-1')).resolves.toBeUndefined();
-    expect(bicycleRepository.deleteById).toHaveBeenCalledWith('bike-1');
+  it('calls deleteByIdForUser and resolves on success', async () => {
+    vi.mocked(bicycleRepository.deleteByIdForUser).mockReturnValue(true);
+    await expect(bicycleService.remove('bike-1', userId)).resolves.toBeUndefined();
+    expect(bicycleRepository.deleteByIdForUser).toHaveBeenCalledWith('bike-1', userId);
   });
 
-  it('throws ApiError(404) when bicycle is not found', async () => {
-    vi.mocked(bicycleRepository.deleteById).mockReturnValue(false);
-    await expect(bicycleService.remove('missing')).rejects.toMatchObject({
+  it('throws ApiError(404) when bicycle is not found or not owned by the user', async () => {
+    vi.mocked(bicycleRepository.deleteByIdForUser).mockReturnValue(false);
+    await expect(bicycleService.remove('missing', userId)).rejects.toMatchObject({
       status: 404,
       code: 'BICYCLE_NOT_FOUND',
     });

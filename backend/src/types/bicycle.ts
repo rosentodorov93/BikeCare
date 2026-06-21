@@ -20,6 +20,7 @@ export type WheelSize = (typeof WHEEL_SIZES)[number];
 
 export interface Bicycle {
   id: string;
+  userId: string;
   name: string;
   brand: string;
   model: string;
@@ -35,6 +36,7 @@ export interface Bicycle {
 // Raw shape of a row returned by SQLite for the `bicycles` table.
 export interface BicycleRow {
   id: string;
+  user_id: string | null;
   name: string;
   brand: string;
   model: string;

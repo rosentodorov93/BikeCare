@@ -13,12 +13,12 @@ export const createActivitySchema = z.object({
 
 export type CreateActivityDto = z.infer<typeof createActivitySchema>;
 
-export const listActivities = asyncHandler(async (_req: Request, res: Response) => {
-  const activities = await activityService.getAll();
+export const listActivities = asyncHandler(async (req: Request, res: Response) => {
+  const activities = await activityService.getAll(req.userId!);
   res.json(ok(activities));
 });
 
 export const createActivity = asyncHandler(async (req: Request, res: Response) => {
-  const activity = await activityService.create(req.body as CreateActivityDto);
+  const activity = await activityService.create(req.body as CreateActivityDto, req.userId!);
   res.status(201).json(ok(activity));
 });

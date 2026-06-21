@@ -39,11 +39,17 @@ export const maintenanceRepository = {
   },
 
   // Number of maintenance events whose service date falls within the range
-  // (inclusive). ISO YYYY-MM-DD strings compare correctly lexicographically.
-  countInRange(from: string, to: string): number {
+  // (inclusive), scoped to bikes owned by this user. ISO YYYY-MM-DD strings
+  // compare correctly lexicographically.
+  countInRangeForUser(userId: string, from: string, to: string): number {
     const row = db
-      .prepare('SELECT COUNT(*) AS count FROM maintenance_records WHERE date >= ? AND date <= ?')
-      .get(from, to) as { count: number };
+      .prepare(
+        `SELECT COUNT(*) AS count
+         FROM maintenance_records m
+         JOIN bicycles b ON b.id = m.bike_id
+         WHERE b.user_id = ? AND m.date >= ? AND m.date <= ?`,
+      )
+      .get(userId, from, to) as { count: number };
     return row.count;
   },
 

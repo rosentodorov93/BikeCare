@@ -34,8 +34,8 @@ export const componentService = {
     return components;
   },
 
-  async getByBikeId(bikeId: string): Promise<Component[]> {
-    const bike = bicycleRepository.findById(bikeId);
+  async getByBikeId(bikeId: string, userId: string): Promise<Component[]> {
+    const bike = bicycleRepository.findByIdForUser(bikeId, userId);
     if (!bike) {
       throw new ApiError(404, 'BICYCLE_NOT_FOUND', `Bicycle ${bikeId} not found`);
     }
@@ -45,8 +45,8 @@ export const componentService = {
 
   // Marks a component as serviced/replaced: its wear resets to 0 by recording
   // the bike's current total distance as the new service baseline.
-  async resetService(bikeId: string, componentId: string): Promise<Component> {
-    const bike = bicycleRepository.findById(bikeId);
+  async resetService(bikeId: string, componentId: string, userId: string): Promise<Component> {
+    const bike = bicycleRepository.findByIdForUser(bikeId, userId);
     if (!bike) {
       throw new ApiError(404, 'BICYCLE_NOT_FOUND', `Bicycle ${bikeId} not found`);
     }

@@ -11,6 +11,6 @@ const periodSchema = z.enum(DASHBOARD_PERIODS).catch('month');
 
 export const getDashboard = asyncHandler(async (req: Request, res: Response) => {
   const period = periodSchema.parse(req.query.period);
-  const data = await dashboardService.getDashboard(period);
+  const data = await dashboardService.getDashboard(period, req.userId!);
   res.json(ok(data));
 });

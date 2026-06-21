@@ -1,0 +1,46 @@
+<div class="auth-card bc-animate-in">
+  <h1>Log in</h1>
+  <p class="auth-subtitle">Welcome back — track wear, plan maintenance, ride with confidence.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="email">Email <span class="req">*</span></label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        placeholder="you@example.com"
+        autocomplete="email"
+      />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <small class="error">A valid email is required.</small>
+      }
+    </div>
+
+    <div class="field">
+      <label for="password">Password <span class="req">*</span></label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        placeholder="••••••••"
+        autocomplete="current-password"
+      />
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <small class="error">Password is required.</small>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="state-error">{{ error() }}</p>
+    }
+
+    <div class="actions">
+      <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+        {{ submitting() ? 'Logging in…' : 'Log in' }}
+      </button>
+    </div>
+  </form>
+
+  <p class="auth-switch">Don't have an account? <a routerLink="/register">Register</a></p>
+</div>

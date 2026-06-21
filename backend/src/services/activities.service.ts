@@ -9,12 +9,12 @@ import { ApiError } from '../utils/api-response.js';
 // bike's total distance, which in turn drives component wear, so the insert and
 // the distance bump happen atomically.
 export const activityService = {
-  async getAll(): Promise<Activity[]> {
-    return activityRepository.findAll();
+  async getAll(userId: string): Promise<Activity[]> {
+    return activityRepository.findAllByUser(userId);
   },
 
-  async create(dto: CreateActivityDto): Promise<Activity> {
-    const bike = bicycleRepository.findById(dto.bikeId);
+  async create(dto: CreateActivityDto, userId: string): Promise<Activity> {
+    const bike = bicycleRepository.findByIdForUser(dto.bikeId, userId);
     if (!bike) {
       throw new ApiError(404, 'BICYCLE_NOT_FOUND', `Bicycle ${dto.bikeId} not found`);
     }

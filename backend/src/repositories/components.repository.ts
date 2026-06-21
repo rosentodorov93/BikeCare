@@ -26,18 +26,19 @@ export interface ComponentWithBike extends Component {
 }
 
 export const componentRepository = {
-  // Every component across all bikes, joined with the owning bike's name and
-  // total distance. Used by the dashboard to flag upcoming service jobs without
-  // an N+1 query per bike.
-  findAllWithBike(): ComponentWithBike[] {
+  // Every component across all bikes owned by this user, joined with the
+  // owning bike's name and total distance. Used by the dashboard to flag
+  // upcoming service jobs without an N+1 query per bike.
+  findAllWithBikeForUser(userId: string): ComponentWithBike[] {
     const rows = db
       .prepare(
         `SELECT c.*, b.name AS bike_name, b.total_distance AS bike_total_distance
          FROM components c
          JOIN bicycles b ON b.id = c.bike_id
+         WHERE b.user_id = ?
          ORDER BY c.rowid`,
       )
-      .all() as (ComponentRow & { bike_name: string; bike_total_distance: number })[];
+      .all(userId) as (ComponentRow & { bike_name: string; bike_total_distance: number })[];
     return rows.map((row) => ({
       ...toComponent(row),
       bikeName: row.bike_name,

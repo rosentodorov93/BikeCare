@@ -33,27 +33,31 @@ export const updateBicycleSchema = z.object(bicycleFields);
 export type CreateBicycleDto = z.infer<typeof createBicycleSchema>;
 export type UpdateBicycleDto = z.infer<typeof updateBicycleSchema>;
 
-export const listBicycles = asyncHandler(async (_req: Request, res: Response) => {
-  const bicycles = await bicycleService.getAll();
+export const listBicycles = asyncHandler(async (req: Request, res: Response) => {
+  const bicycles = await bicycleService.getAll(req.userId!);
   res.json(ok(bicycles));
 });
 
 export const getBicycle = asyncHandler(async (req: Request, res: Response) => {
-  const bicycle = await bicycleService.getById(req.params.id);
+  const bicycle = await bicycleService.getById(req.params.id, req.userId!);
   res.json(ok(bicycle));
 });
 
 export const createBicycle = asyncHandler(async (req: Request, res: Response) => {
-  const bicycle = await bicycleService.create(req.body as CreateBicycleDto);
+  const bicycle = await bicycleService.create(req.body as CreateBicycleDto, req.userId!);
   res.status(201).json(ok(bicycle));
 });
 
 export const updateBicycle = asyncHandler(async (req: Request, res: Response) => {
-  const bicycle = await bicycleService.update(req.params.id, req.body as UpdateBicycleDto);
+  const bicycle = await bicycleService.update(
+    req.params.id,
+    req.body as UpdateBicycleDto,
+    req.userId!,
+  );
   res.json(ok(bicycle));
 });
 
 export const deleteBicycle = asyncHandler(async (req: Request, res: Response) => {
-  await bicycleService.remove(req.params.id);
+  await bicycleService.remove(req.params.id, req.userId!);
   res.status(204).send();
 });

@@ -8,6 +8,7 @@ import type { Bicycle, BicycleRow } from '../types/bicycle.js';
 function toBicycle(row: BicycleRow): Bicycle {
   return {
     id: row.id,
+    userId: row.user_id as string,
     name: row.name,
     brand: row.brand,
     model: row.model,
@@ -22,13 +23,16 @@ function toBicycle(row: BicycleRow): Bicycle {
 }
 
 export const bicycleRepository = {
-  findAll(): Bicycle[] {
+  findAllByUser(userId: string): Bicycle[] {
     const rows = db
-      .prepare('SELECT * FROM bicycles ORDER BY created_at DESC')
-      .all() as BicycleRow[];
+      .prepare('SELECT * FROM bicycles WHERE user_id = ? ORDER BY created_at DESC')
+      .all(userId) as BicycleRow[];
     return rows.map(toBicycle);
   },
 
+  // Unscoped lookup retained for internal use (e.g. activityService resolving
+  // a bike to compute distance). Ownership is enforced by the caller via
+  // findByIdForUser, not baked into every read.
   findById(id: string): Bicycle | undefined {
     const row = db.prepare('SELECT * FROM bicycles WHERE id = ?').get(id) as
       | BicycleRow
@@ -36,13 +40,21 @@ export const bicycleRepository = {
     return row ? toBicycle(row) : undefined;
   },
 
+  findByIdForUser(id: string, userId: string): Bicycle | undefined {
+    const row = db
+      .prepare('SELECT * FROM bicycles WHERE id = ? AND user_id = ?')
+      .get(id, userId) as BicycleRow | undefined;
+    return row ? toBicycle(row) : undefined;
+  },
+
   insert(bicycle: Bicycle): Bicycle {
     db.prepare(
       `INSERT INTO bicycles
-        (id, name, brand, model, type, purchase_date, frame_size, wheel_size, total_distance, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, user_id, name, brand, model, type, purchase_date, frame_size, wheel_size, total_distance, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       bicycle.id,
+      bicycle.userId,
       bicycle.name,
       bicycle.brand,
       bicycle.model,
@@ -77,8 +89,10 @@ export const bicycleRepository = {
     return this.findById(bicycle.id) as Bicycle;
   },
 
-  deleteById(id: string): boolean {
-    const result = db.prepare('DELETE FROM bicycles WHERE id = ?').run(id);
+  deleteByIdForUser(id: string, userId: string): boolean {
+    const result = db
+      .prepare('DELETE FROM bicycles WHERE id = ? AND user_id = ?')
+      .run(id, userId);
     return result.changes > 0;
   },
 

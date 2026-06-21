@@ -11,22 +11,24 @@ import { ApiError } from '../utils/api-response.js';
 
 // Business logic for bicycles. Owns id/timestamp generation and not-found rules.
 export const bicycleService = {
-  async getAll(): Promise<Bicycle[]> {
-    return bicycleRepository.findAll();
+  async getAll(userId: string): Promise<Bicycle[]> {
+    return bicycleRepository.findAllByUser(userId);
   },
 
-  async getById(id: string): Promise<Bicycle> {
-    const bicycle = bicycleRepository.findById(id);
+  async getById(id: string, userId: string): Promise<Bicycle> {
+    const bicycle = bicycleRepository.findByIdForUser(id, userId);
     if (!bicycle) {
+      // 404 (not 403) for another user's bike - avoids leaking existence.
       throw new ApiError(404, 'BICYCLE_NOT_FOUND', `Bicycle ${id} not found`);
     }
     return bicycle;
   },
 
-  async create(dto: CreateBicycleDto): Promise<Bicycle> {
+  async create(dto: CreateBicycleDto, userId: string): Promise<Bicycle> {
     const now = new Date().toISOString();
     const bicycle: Bicycle = {
       id: bicycleRepository.newId(),
+      userId,
       name: dto.name,
       brand: dto.brand,
       model: dto.model,
@@ -51,8 +53,8 @@ export const bicycleService = {
     return bicycleRepository.findById(bicycle.id) as Bicycle;
   },
 
-  async update(id: string, dto: UpdateBicycleDto): Promise<Bicycle> {
-    const existing = await this.getById(id);
+  async update(id: string, dto: UpdateBicycleDto, userId: string): Promise<Bicycle> {
+    const existing = await this.getById(id, userId);
     const updated: Bicycle = {
       ...existing,
       name: dto.name,
@@ -67,8 +69,8 @@ export const bicycleService = {
     return bicycleRepository.update(updated);
   },
 
-  async remove(id: string): Promise<void> {
-    const deleted = bicycleRepository.deleteById(id);
+  async remove(id: string, userId: string): Promise<void> {
+    const deleted = bicycleRepository.deleteByIdForUser(id, userId);
     if (!deleted) {
       throw new ApiError(404, 'BICYCLE_NOT_FOUND', `Bicycle ${id} not found`);
     }

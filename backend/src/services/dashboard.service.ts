@@ -55,17 +55,21 @@ function resolveRange(period: DashboardPeriod): { from: string; to: string } {
 }
 
 export const dashboardService = {
-  async getDashboard(period: DashboardPeriod): Promise<DashboardData> {
+  async getDashboard(period: DashboardPeriod, userId: string): Promise<DashboardData> {
     const range = resolveRange(period);
 
-    const bikes = bicycleRepository.findAll();
-    const activityStats = activityRepository.statsInRange(range.from, range.to);
-    const maintenanceEvents = maintenanceRepository.countInRange(range.from, range.to);
+    const bikes = bicycleRepository.findAllByUser(userId);
+    const activityStats = activityRepository.statsInRangeForUser(userId, range.from, range.to);
+    const maintenanceEvents = maintenanceRepository.countInRangeForUser(
+      userId,
+      range.from,
+      range.to,
+    );
 
     // Upcoming service jobs: components whose computed wear meets the threshold,
     // most worn first.
     const upcomingJobs: UpcomingJob[] = componentRepository
-      .findAllWithBike()
+      .findAllWithBikeForUser(userId)
       .map((c) => {
         const wearState = computeWearState(c, c.bikeTotalDistance);
         return {
@@ -84,7 +88,7 @@ export const dashboardService = {
     // ridden in the period first.
     const periodByBike = new Map(
       activityRepository
-        .distanceByBikeInRange(range.from, range.to)
+        .distanceByBikeInRangeForUser(userId, range.from, range.to)
         .map((r) => [r.bikeId, r.distanceKm]),
     );
     const bikeDistances: BikeDistance[] = bikes

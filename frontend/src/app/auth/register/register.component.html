@@ -1,0 +1,60 @@
+<div class="auth-card bc-animate-in">
+  <h1>Create an account</h1>
+  <p class="auth-subtitle">Register a bike, log rides, and stay ahead of maintenance.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="username">Username <span class="req">*</span></label>
+      <input
+        id="username"
+        type="text"
+        formControlName="username"
+        placeholder="e.g. gravelgremlin"
+        autocomplete="username"
+      />
+      @if (form.controls.username.touched && form.controls.username.invalid) {
+        <small class="error">Username must be at least 3 characters.</small>
+      }
+    </div>
+
+    <div class="field">
+      <label for="email">Email <span class="req">*</span></label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        placeholder="you@example.com"
+        autocomplete="email"
+      />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <small class="error">A valid email is required.</small>
+      }
+    </div>
+
+    <div class="field">
+      <label for="password">Password <span class="req">*</span></label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        placeholder="••••••••"
+        autocomplete="new-password"
+      />
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <small class="error">Password must be at least 8 characters.</small>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="state-error">{{ error() }}</p>
+    }
+
+    <div class="actions">
+      <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+        {{ submitting() ? 'Creating account…' : 'Create account' }}
+      </button>
+    </div>
+  </form>
+
+  <p class="auth-switch">Already have an account? <a routerLink="/login">Log in</a></p>
+</div>

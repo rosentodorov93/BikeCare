@@ -13,6 +13,15 @@ function addColumnIfMissing(table: string, column: string, definition: string): 
 // startup so a fresh checkout works without a manual step).
 export function migrate(): void {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id            TEXT PRIMARY KEY,
+      username      TEXT NOT NULL UNIQUE,
+      email         TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at    TEXT NOT NULL,
+      updated_at    TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS bicycles (
       id             TEXT PRIMARY KEY,
       name           TEXT NOT NULL,
@@ -67,6 +76,13 @@ export function migrate(): void {
   addColumnIfMissing('bicycles', 'total_distance', 'REAL NOT NULL DEFAULT 0');
   addColumnIfMissing('components', 'service_interval_km', 'REAL NOT NULL DEFAULT 3000');
   addColumnIfMissing('components', 'distance_at_service', 'REAL NOT NULL DEFAULT 0');
+
+  // Nullable because SQLite can't add a NOT NULL column without a default to a
+  // non-empty table, and there's no sensible default owner for pre-existing rows.
+  // Bikes with user_id = NULL predate auth and become inaccessible to every
+  // account once auth ships - expected for a local/self-hosted DB.
+  addColumnIfMissing('bicycles', 'user_id', 'TEXT REFERENCES users(id) ON DELETE CASCADE');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_bicycles_user_id ON bicycles(user_id)');
 }
 
 // Allow running directly: `tsx src/db/migrate.ts`.
