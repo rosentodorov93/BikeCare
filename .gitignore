@@ -11,7 +11,11 @@ backend/data/
 frontend/dist/
 frontend/.angular/
 
+# Agent tooling / vendored skills (local-only, not project code)
+.agents/
+
 # Misc
 .env
 *.log
 .DS_Store
+Thumbs.db
