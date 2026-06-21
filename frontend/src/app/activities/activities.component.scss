@@ -129,9 +129,12 @@
 }
 
 .activity-bike {
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   text-decoration: none;
   color: var(--bc-text);
+  min-width: 0;
   transition: color 0.15s var(--bc-ease);
 
   &:hover {
@@ -142,6 +145,23 @@
     grid-column: 1 / -1;
     order: -1;
   }
+}
+
+.activity-bike-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bc-surface-2);
+  border: 1px solid var(--bc-border);
+}
+
+.activity-bike-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .activity-distance {

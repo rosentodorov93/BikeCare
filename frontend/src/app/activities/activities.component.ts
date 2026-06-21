@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
-import { Bicycle } from '../bicycles/bicycle.model';
+import { Bicycle, DEFAULT_BIKE_IMAGE } from '../bicycles/bicycle.model';
 import { BicycleService } from '../bicycles/bicycle.service';
 import { Activity, ActivityPayload } from './activity.model';
 import { ActivityService } from './activity.service';
@@ -19,6 +19,12 @@ export class ActivitiesComponent {
   private readonly fb = inject(FormBuilder).nonNullable;
   private readonly activityService = inject(ActivityService);
   private readonly bicycleService = inject(BicycleService);
+
+  protected readonly placeholder = DEFAULT_BIKE_IMAGE;
+
+  protected onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = this.placeholder;
+  }
 
   // Bikes for the dropdown; an empty list disables the form (nothing to log to).
   protected readonly bikes = toSignal(

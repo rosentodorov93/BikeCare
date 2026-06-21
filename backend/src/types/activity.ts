@@ -7,6 +7,7 @@ export interface Activity {
   id: string;
   bikeId: string;
   bikeName: string;
+  bikeImageUrl: string | null;
   date: string; // ISO date (YYYY-MM-DD)
   distanceKm: number;
   createdAt: string; // ISO timestamp
@@ -18,6 +19,7 @@ export interface ActivityRow {
   id: string;
   bike_id: string;
   bike_name: string;
+  bike_image_url: string | null;
   date: string;
   distance_km: number;
   created_at: string;

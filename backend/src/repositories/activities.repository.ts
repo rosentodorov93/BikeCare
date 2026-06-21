@@ -10,6 +10,7 @@ function toActivity(row: ActivityRow): Activity {
     id: row.id,
     bikeId: row.bike_id,
     bikeName: row.bike_name,
+    bikeImageUrl: row.bike_image_url,
     date: row.date,
     distanceKm: row.distance_km,
     createdAt: row.created_at,
@@ -17,7 +18,7 @@ function toActivity(row: ActivityRow): Activity {
 }
 
 const SELECT_WITH_BIKE = `
-  SELECT a.id, a.bike_id, b.name AS bike_name, a.date, a.distance_km, a.created_at
+  SELECT a.id, a.bike_id, b.name AS bike_name, b.image_url AS bike_image_url, a.date, a.distance_km, a.created_at
   FROM activities a
   JOIN bicycles b ON b.id = a.bike_id
 `;

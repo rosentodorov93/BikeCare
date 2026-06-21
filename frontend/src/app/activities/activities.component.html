@@ -55,7 +55,10 @@
       @for (activity of activities(); track activity.id) {
         <li class="activity">
           <span class="activity-date">{{ activity.date | date: 'mediumDate' }}</span>
-          <a class="activity-bike" [routerLink]="['/bicycles', activity.bikeId]">{{ activity.bikeName }}</a>
+          <a class="activity-bike" [routerLink]="['/bicycles', activity.bikeId]">
+            <img class="activity-bike-thumb" [src]="activity.bikeImageUrl || placeholder" (error)="onImageError($event)" alt="" />
+            <span class="activity-bike-name">{{ activity.bikeName }}</span>
+          </a>
           <span class="activity-distance">{{ activity.distanceKm | number: '1.0-1' }} km</span>
         </li>
       }

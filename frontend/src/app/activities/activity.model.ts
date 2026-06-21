@@ -6,6 +6,7 @@ export interface Activity {
   id: string;
   bikeId: string;
   bikeName: string;
+  bikeImageUrl: string | null;
   date: string; // ISO date (YYYY-MM-DD)
   distanceKm: number;
   createdAt: string;
