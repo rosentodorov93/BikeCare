@@ -45,14 +45,37 @@
 }
 
 <section class="log">
-  <h2>Logged activities</h2>
+  <div class="log-toolbar">
+    <h2>Logged activities</h2>
+    @if (activities().length > 0) {
+      <div class="toolbar-controls">
+        <div class="toolbar-field">
+          <label for="sort">Sort by</label>
+          <select id="sort" [value]="sort()" (change)="onSortChange($event)">
+            @for (option of SORT_OPTIONS; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="toolbar-field">
+          <label for="bikeFilter">Bike</label>
+          <select id="bikeFilter" [value]="bikeFilter()" (change)="onBikeFilterChange($event)">
+            <option value="">All bikes</option>
+            @for (bike of bikes(); track bike.id) {
+              <option [value]="bike.id">{{ bike.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    }
+  </div>
   @if (loading()) {
     <p class="state-msg">Loading…</p>
   } @else if (loadError()) {
     <p class="state-msg state-error">Couldn't load activities.</p>
-  } @else if (activities().length > 0) {
+  } @else if (visibleActivities().length > 0) {
     <ul class="activity-list">
-      @for (activity of activities(); track activity.id) {
+      @for (activity of visibleActivities(); track activity.id) {
         <li class="activity">
           <span class="activity-date">{{ activity.date | date: 'mediumDate' }}</span>
           <a class="activity-bike" [routerLink]="['/bicycles', activity.bikeId]">
@@ -63,6 +86,8 @@
         </li>
       }
     </ul>
+  } @else if (activities().length > 0) {
+    <p class="state-msg">No activities match this filter.</p>
   } @else {
     <p class="state-msg">No activities logged yet.</p>
   }

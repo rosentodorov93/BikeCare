@@ -9,6 +9,8 @@ import { BicycleService } from '../bicycles/bicycle.service';
 import { Activity, ActivityPayload } from './activity.model';
 import { ActivityService } from './activity.service';
 
+type ActivitySort = 'date-desc' | 'date-asc' | 'distance-desc' | 'distance-asc';
+
 @Component({
   selector: 'app-activities',
   imports: [ReactiveFormsModule, RouterLink, DatePipe, DecimalPipe],
@@ -40,6 +42,49 @@ export class ActivitiesComponent {
   protected readonly submitting = signal(false);
 
   protected readonly hasBikes = computed(() => this.bikes().length > 0);
+
+  protected readonly SORT_OPTIONS: { value: ActivitySort; label: string }[] = [
+    { value: 'date-desc', label: 'Date (newest)' },
+    { value: 'date-asc', label: 'Date (oldest)' },
+    { value: 'distance-desc', label: 'Distance (highest)' },
+    { value: 'distance-asc', label: 'Distance (lowest)' },
+  ];
+
+  protected readonly sort = signal<ActivitySort>('date-desc');
+  protected readonly bikeFilter = signal<string>('');
+
+  // Derived view of `activities` for display only — the raw signal stays the
+  // source of truth so submit() can keep prepending to it untouched.
+  protected readonly visibleActivities = computed(() => {
+    const bikeId = this.bikeFilter();
+    const sort = this.sort();
+
+    const filtered = bikeId
+      ? this.activities().filter((activity) => activity.bikeId === bikeId)
+      : this.activities();
+
+    return [...filtered].sort((a, b) => {
+      switch (sort) {
+        case 'date-asc':
+          return a.date.localeCompare(b.date);
+        case 'distance-desc':
+          return b.distanceKm - a.distanceKm;
+        case 'distance-asc':
+          return a.distanceKm - b.distanceKm;
+        case 'date-desc':
+        default:
+          return b.date.localeCompare(a.date);
+      }
+    });
+  });
+
+  protected onSortChange(event: Event): void {
+    this.sort.set((event.target as HTMLSelectElement).value as ActivitySort);
+  }
+
+  protected onBikeFilterChange(event: Event): void {
+    this.bikeFilter.set((event.target as HTMLSelectElement).value);
+  }
 
   protected readonly form = this.fb.group({
     bikeId: this.fb.control('', { validators: [Validators.required] }),

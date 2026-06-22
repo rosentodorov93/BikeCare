@@ -17,6 +17,16 @@ const mockActivity: Activity = {
   createdAt: '2026-06-19T10:00:00.000Z',
 };
 
+const mockActivity2: Activity = {
+  id: 'a2',
+  bikeId: 'b2',
+  bikeName: 'Gravel Bike',
+  bikeImageUrl: null,
+  date: '2026-06-21',
+  distanceKm: 20,
+  createdAt: '2026-06-21T10:00:00.000Z',
+};
+
 const mockBicycle: Bicycle = {
   id: 'b1',
   name: 'Road Bike',
@@ -30,6 +40,12 @@ const mockBicycle: Bicycle = {
   totalDistance: 500,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
+};
+
+const mockBicycle2: Bicycle = {
+  ...mockBicycle,
+  id: 'b2',
+  name: 'Gravel Bike',
 };
 
 describe('ActivitiesComponent', () => {
@@ -125,6 +141,77 @@ describe('ActivitiesComponent', () => {
 
         expect((component as any).form.controls.distanceKm.value).toBeNull();
       }));
+    });
+  });
+
+  describe('sort and filter', () => {
+    let fixture: ComponentFixture<ActivitiesComponent>;
+    let component: ActivitiesComponent;
+
+    beforeEach(async () => {
+      activitySpy.getAll.and.returnValue(of([mockActivity, mockActivity2]));
+      bicycleSpy.getAll.and.returnValue(of([mockBicycle, mockBicycle2]));
+
+      await TestBed.configureTestingModule({
+        imports: [ActivitiesComponent],
+        providers: [
+          { provide: ActivityService, useValue: activitySpy },
+          { provide: BicycleService, useValue: bicycleSpy },
+          provideRouter([]),
+        ],
+      }).compileComponents();
+      fixture = TestBed.createComponent(ActivitiesComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
+
+    it('should default to date-desc order', () => {
+      const list = (component as any).visibleActivities();
+      expect(list.map((a: Activity) => a.id)).toEqual(['a2', 'a1']);
+    });
+
+    it('should sort by date-asc', () => {
+      (component as any).sort.set('date-asc');
+      const list = (component as any).visibleActivities();
+      expect(list.map((a: Activity) => a.id)).toEqual(['a1', 'a2']);
+    });
+
+    it('should sort by distance-desc', () => {
+      (component as any).sort.set('distance-desc');
+      const list = (component as any).visibleActivities();
+      expect(list.map((a: Activity) => a.id)).toEqual(['a1', 'a2']);
+    });
+
+    it('should sort by distance-asc', () => {
+      (component as any).sort.set('distance-asc');
+      const list = (component as any).visibleActivities();
+      expect(list.map((a: Activity) => a.id)).toEqual(['a2', 'a1']);
+    });
+
+    it('should filter by bike', () => {
+      (component as any).bikeFilter.set('b2');
+      const list = (component as any).visibleActivities();
+      expect(list.map((a: Activity) => a.id)).toEqual(['a2']);
+    });
+
+    it('should show all activities when filter is cleared', () => {
+      (component as any).bikeFilter.set('b2');
+      (component as any).bikeFilter.set('');
+      const list = (component as any).visibleActivities();
+      expect(list.length).toBe(2);
+    });
+
+    it('should leave the raw activities signal untouched when sorting/filtering', () => {
+      (component as any).sort.set('distance-asc');
+      (component as any).bikeFilter.set('b1');
+      const raw = (component as any).activities();
+      expect(raw.map((a: Activity) => a.id)).toEqual(['a1', 'a2']);
+    });
+
+    it('should report no match when the filter excludes every activity', () => {
+      (component as any).bikeFilter.set('does-not-exist');
+      expect((component as any).visibleActivities().length).toBe(0);
+      expect((component as any).activities().length).toBeGreaterThan(0);
     });
   });
 
