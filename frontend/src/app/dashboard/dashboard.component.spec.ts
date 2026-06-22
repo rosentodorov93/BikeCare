@@ -4,6 +4,7 @@ import { of, Subject, throwError } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { DashboardService } from './dashboard.service';
 import { DashboardData } from './dashboard.model';
+import { BicycleService } from '../bicycles/bicycle.service';
 
 const mockData: DashboardData = {
   period: 'month',
@@ -11,8 +12,26 @@ const mockData: DashboardData = {
   stats: { totalBikes: 2, distanceKm: 150, activityCount: 10, maintenanceEvents: 1 },
   upcomingJobs: [],
   bikes: [
-    { id: '1', name: 'Road Bike', type: 'road', imageUrl: null, periodDistanceKm: 100, totalDistance: 1000 },
-    { id: '2', name: 'MTB', type: 'mountain', imageUrl: null, periodDistanceKm: 50, totalDistance: 500 },
+    {
+      id: '1',
+      name: 'Road Bike',
+      type: 'road',
+      imageUrl: null,
+      periodDistanceKm: 100,
+      totalDistance: 1000,
+      periodServiceCount: 1,
+      totalServiceCount: 3,
+    },
+    {
+      id: '2',
+      name: 'MTB',
+      type: 'mountain',
+      imageUrl: null,
+      periodDistanceKm: 50,
+      totalDistance: 500,
+      periodServiceCount: 0,
+      totalServiceCount: 2,
+    },
   ],
 };
 
@@ -20,15 +39,18 @@ describe('DashboardComponent', () => {
   let fixture: ComponentFixture<DashboardComponent>;
   let component: DashboardComponent;
   let serviceSpy: jasmine.SpyObj<DashboardService>;
+  let bicycleSpy: jasmine.SpyObj<BicycleService>;
 
   beforeEach(async () => {
     serviceSpy = jasmine.createSpyObj('DashboardService', ['get']);
     serviceSpy.get.and.returnValue(of(mockData));
+    bicycleSpy = jasmine.createSpyObj('BicycleService', ['downloadReport']);
 
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
         { provide: DashboardService, useValue: serviceSpy },
+        { provide: BicycleService, useValue: bicycleSpy },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -73,12 +95,12 @@ describe('DashboardComponent', () => {
     expect((component as any).bikes()).toEqual(mockData.bikes);
   }));
 
-  it('renders a card photo per bike, using the placeholder when no photo is set', fakeAsync(() => {
+  it('renders a thumbnail per bike, using the placeholder when no photo is set', fakeAsync(() => {
     fixture.detectChanges();
     tick(0);
     fixture.detectChanges();
     const photos: HTMLImageElement[] = Array.from(
-      fixture.nativeElement.querySelectorAll('.card-photo'),
+      fixture.nativeElement.querySelectorAll('.bike-thumb'),
     );
     expect(photos.length).toBe(2);
     expect(photos[0].getAttribute('src')).toBe('/images/bike-placeholder.svg');
@@ -95,26 +117,55 @@ describe('DashboardComponent', () => {
     f.detectChanges();
     tick(0);
     f.detectChanges();
-    const photo: HTMLImageElement = f.nativeElement.querySelector('.card-photo');
+    const photo: HTMLImageElement = f.nativeElement.querySelector('.bike-thumb');
     expect(photo.getAttribute('src')).toBe('data:image/jpeg;base64,abc');
   }));
 
-  it('renders period distance and total distance on each bike card', fakeAsync(() => {
+  it('renders period and total distance/service counts on each bike row', fakeAsync(() => {
     fixture.detectChanges();
     tick(0);
     fixture.detectChanges();
-    const rows: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.dist-row'));
+    const rows: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.bike-row'));
     expect(rows.length).toBe(2);
     expect(rows[0].textContent).toContain('100'); // Road Bike periodDistanceKm
     expect(rows[0].textContent).toContain('1000'); // Road Bike totalDistance
+    expect(rows[0].textContent).toContain('3'); // Road Bike totalServiceCount
     expect(rows[1].textContent).toContain('50'); // MTB periodDistanceKm
     expect(rows[1].textContent).toContain('500'); // MTB totalDistance
+    expect(rows[1].textContent).toContain('2'); // MTB totalServiceCount
   }));
 
-  it('asBicycle() returns the same object reference cast as Bicycle', () => {
-    const bike = mockData.bikes[0];
-    const result = (component as any).asBicycle(bike);
-    expect(result).toBe(bike as any);
+  describe('getReport()', () => {
+    function fakeEvent(): Event {
+      return jasmine.createSpyObj('Event', ['preventDefault', 'stopPropagation']);
+    }
+
+    it('does nothing when a download is already in progress', () => {
+      (component as any).reportDownloadingId.set('1');
+      (component as any).getReport(fakeEvent(), '1', 'Road Bike');
+      expect(bicycleSpy.downloadReport).not.toHaveBeenCalled();
+    });
+
+    it('downloads the report and clears the downloading id on success', fakeAsync(() => {
+      bicycleSpy.downloadReport.and.returnValue(of(new Blob(['x'])));
+      spyOn(URL, 'createObjectURL').and.returnValue('blob:fake');
+      spyOn(URL, 'revokeObjectURL');
+
+      (component as any).getReport(fakeEvent(), '1', 'Road Bike');
+      tick();
+
+      expect(bicycleSpy.downloadReport).toHaveBeenCalledWith('1');
+      expect((component as any).reportDownloadingId()).toBeNull();
+    }));
+
+    it('clears the downloading id when the download fails', fakeAsync(() => {
+      bicycleSpy.downloadReport.and.returnValue(throwError(() => new Error('fail')));
+
+      (component as any).getReport(fakeEvent(), '1', 'Road Bike');
+      tick();
+
+      expect((component as any).reportDownloadingId()).toBeNull();
+    }));
   });
 
   it('should be in loading state while awaiting service response', () => {
@@ -159,29 +210,6 @@ describe('DashboardComponent', () => {
     });
   });
 
-  describe('barWidth()', () => {
-    it('should return 0 when max distance is 0', fakeAsync(() => {
-      serviceSpy.get.and.returnValue(of({ ...mockData, bikes: [] }));
-      fixture.detectChanges();
-      tick(0);
-      expect((component as any).barWidth(100)).toBe(0);
-    }));
-
-    it('should return 100 for the bike with max distance', fakeAsync(() => {
-      fixture.detectChanges();
-      tick(0);
-      // maxPeriodDistance = 100 (Road Bike)
-      expect((component as any).barWidth(100)).toBe(100);
-    }));
-
-    it('should scale proportionally', fakeAsync(() => {
-      fixture.detectChanges();
-      tick(0);
-      // 50 / 100 * 100 = 50
-      expect((component as any).barWidth(50)).toBe(50);
-    }));
-  });
-
   describe('typeLabel()', () => {
     it('should return the human-readable label for known types', () => {
       expect((component as any).typeLabel('road')).toBe('Road');
@@ -210,18 +238,4 @@ describe('DashboardComponent', () => {
     }));
   });
 
-  describe('maxPeriodDistance', () => {
-    it('should return 0 when bikes list is empty', fakeAsync(() => {
-      serviceSpy.get.and.returnValue(of({ ...mockData, bikes: [] }));
-      fixture.detectChanges();
-      tick(0);
-      expect((component as any).maxPeriodDistance()).toBe(0);
-    }));
-
-    it('should return the highest periodDistanceKm among bikes', fakeAsync(() => {
-      fixture.detectChanges();
-      tick(0);
-      expect((component as any).maxPeriodDistance()).toBe(100);
-    }));
-  });
 });

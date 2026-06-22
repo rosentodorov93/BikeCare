@@ -16,7 +16,11 @@ vi.mock('../repositories/components.repository.js', () => ({
 }));
 
 vi.mock('../repositories/maintenance.repository.js', () => ({
-  maintenanceRepository: { countInRangeForUser: vi.fn() },
+  maintenanceRepository: {
+    countInRangeForUser: vi.fn(),
+    countByBikeInRangeForUser: vi.fn(),
+    countTotalByBikeForUser: vi.fn(),
+  },
 }));
 
 import type { Bicycle } from '../types/bicycle.js';
@@ -71,6 +75,8 @@ beforeEach(() => {
   ]);
   vi.mocked(componentRepository.findAllWithBikeForUser).mockReturnValue([]);
   vi.mocked(maintenanceRepository.countInRangeForUser).mockReturnValue(2);
+  vi.mocked(maintenanceRepository.countByBikeInRangeForUser).mockReturnValue([]);
+  vi.mocked(maintenanceRepository.countTotalByBikeForUser).mockReturnValue([]);
 });
 
 describe('dashboardService.getDashboard — period ranges', () => {
@@ -136,6 +142,12 @@ describe('dashboardService.getDashboard — stats', () => {
       '2025-06-01',
       '2025-06-30',
     );
+    expect(maintenanceRepository.countByBikeInRangeForUser).toHaveBeenCalledWith(
+      userId,
+      '2025-06-01',
+      '2025-06-30',
+    );
+    expect(maintenanceRepository.countTotalByBikeForUser).toHaveBeenCalledWith(userId);
   });
 });
 
@@ -151,14 +163,33 @@ describe('dashboardService.getDashboard — bikeDistances', () => {
     });
   });
 
+  it('includes period and total service counts per bike', async () => {
+    vi.mocked(maintenanceRepository.countByBikeInRangeForUser).mockReturnValue([
+      { bikeId: 'bike-1', count: 1 },
+    ]);
+    vi.mocked(maintenanceRepository.countTotalByBikeForUser).mockReturnValue([
+      { bikeId: 'bike-1', count: 4 },
+    ]);
+
+    const result = await dashboardService.getDashboard('month', userId);
+    expect(result.bikes[0].periodServiceCount).toBe(1);
+    expect(result.bikes[0].totalServiceCount).toBe(4);
+  });
+
+  it('defaults service counts to 0 for bikes with no maintenance records', async () => {
+    const result = await dashboardService.getDashboard('month', userId);
+    expect(result.bikes[0].periodServiceCount).toBe(0);
+    expect(result.bikes[0].totalServiceCount).toBe(0);
+  });
+
   it('defaults periodDistanceKm to 0 for bikes with no rides in the period', async () => {
     vi.mocked(activityRepository.distanceByBikeInRangeForUser).mockReturnValue([]);
     const result = await dashboardService.getDashboard('month', userId);
     expect(result.bikes[0].periodDistanceKm).toBe(0);
   });
 
-  it('sorts bikes by periodDistanceKm descending', async () => {
-    const bike2: Bicycle = { ...sampleBike, id: 'bike-2', name: 'MTB', totalDistance: 300 };
+  it('sorts bikes by name ascending', async () => {
+    const bike2: Bicycle = { ...sampleBike, id: 'bike-2', name: 'Alpine Racer', totalDistance: 300 };
     vi.mocked(bicycleRepository.findAllByUser).mockReturnValue([sampleBike, bike2]);
     vi.mocked(activityRepository.distanceByBikeInRangeForUser).mockReturnValue([
       { bikeId: 'bike-1', distanceKm: 50 },
@@ -166,6 +197,7 @@ describe('dashboardService.getDashboard — bikeDistances', () => {
     ]);
 
     const result = await dashboardService.getDashboard('month', userId);
+    // 'Alpine Racer' < 'City Cruiser' alphabetically, regardless of distance.
     expect(result.bikes[0].id).toBe('bike-2');
     expect(result.bikes[1].id).toBe('bike-1');
   });

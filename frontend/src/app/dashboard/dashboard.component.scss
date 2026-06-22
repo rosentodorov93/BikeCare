@@ -291,7 +291,7 @@
   width: 38px;
   height: 38px;
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: contain;
   flex-shrink: 0;
   background: var(--bc-surface-2);
   border: 1px solid var(--bc-border);

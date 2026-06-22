@@ -11,6 +11,7 @@ const mockActivity: Activity = {
   id: 'a1',
   bikeId: 'b1',
   bikeName: 'Road Bike',
+  bikeImageUrl: null,
   date: '2026-06-19',
   distanceKm: 50,
   createdAt: '2026-06-19T10:00:00.000Z',
