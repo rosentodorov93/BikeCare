@@ -36,37 +36,64 @@ This is a local-first / self-hosted style application: SQLite is used as the per
 ```
 
 - **Frontend (Angular)**: presentation and client-side state. Talks to the backend exclusively through the REST API — no direct database access from the client.
-- **Backend (Express.js)**: exposes a REST API for all domain operations (CRUD on bicycles, components, activities, maintenance/service records, schedules). Owns business logic such as wear calculation and maintenance due-status.
-- **Database (SQLite)**: single local file, accessed only from the backend. Schema should be managed through migrations rather than ad-hoc changes once implementation begins.
+- **Backend (Express.js)**: layered as routes → controllers → services → repositories. Owns business logic such as wear calculation, and runs migrations on startup so a fresh checkout works without a manual step.
+- **Database (SQLite)**: single local file under `backend/data/`, accessed only from the backend via `better-sqlite3`. Schema lives in `backend/src/db/migrate.ts` as an idempotent migration function (uses `CREATE TABLE IF NOT EXISTS` plus `addColumnIfMissing` for incremental column additions).
 
-Expected top-level layout (to be created during implementation):
+Top-level layout:
 
 ```
 BikeCare/
-├── frontend/        # Angular application
-├── backend/         # Express.js REST API
-└── CLAUDE.md
+├── frontend/        # Angular SPA (standalone components, lazy-loaded routes)
+│   └── src/app/
+│       ├── auth/        # login, register, guard, JWT interceptor
+│       ├── bicycles/     # list, detail, form, card
+│       ├── components/   # component icon/model/service
+│       ├── activities/   # ride log, with sort/filter
+│       └── dashboard/
+└── backend/         # Express + TypeScript REST API
+    └── src/
+        ├── routes/        # auth, bicycles, activities, dashboard
+        ├── controllers/   # auth, bicycles, components, activities, dashboard
+        ├── services/      # auth, bicycles, components, activities, dashboard, report
+        ├── repositories/  # users, bicycles, components, activities, maintenance
+        ├── types/         # domain types + raw SQLite row shapes
+        ├── db/            # connection.ts, migrate.ts
+        └── middleware/
 ```
 
-## Domain Model (conceptual)
+## Domain Model (as implemented)
 
-These are the core entities the system is built around. Exact schema/fields will be finalized during implementation, but the relationships are foundational to the design:
+- **User** — `id`, `username`, `email`, `password_hash` (bcrypt). Auth is JWT-based (`jsonwebtoken`, 7-day token), issued on register/login and checked by `auth.interceptor.ts` / `authGuard` on the frontend and an Express auth middleware on the backend. Multi-user: every bicycle is scoped to a `user_id`.
+- **Bicycle** — `name`, `brand`, `model`, `type`, `purchase_date`, `frame_size`, `wheel_size`, `total_distance` (accumulated from activities), optional `image_url` (base64 data URL), `user_id`.
+- **Component** — belongs to a bicycle. Has `name`, `service_interval_km`, `distance_at_service` (the bike's `total_distance` at last service/reset). Wear is *not* stored — it's computed on read as `wearState = round((total_distance - distance_at_service) / service_interval_km * 100)`, uncapped so overdue parts show >100%. Components are seeded automatically from the bike's suspension type (`no_suspension` / `hardtail` / `full_suspension`), each extending a shared base set (Chain, Brake pads, Tires, Cables, Cassette, Crankset, Bottom bracket; hardtail adds Front fork shock; full suspension adds Front fork shock + Rear shock), with per-name default service intervals (e.g. Chain 3000 km, Tires 4000 km, Cassette 8000 km).
+- **Activity** — a logged ride: `bike_id`, `date`, `distance_km`. Adding one increases the bike's `total_distance`, which feeds every component's wear calculation. Frontend activities view supports sort/filter and shows the bike's image.
+- **MaintenanceRecord** — logged whenever a component's service is reset: `bike_id`, `component_id` (nullable — survives component deletion via `ON DELETE SET NULL`), a snapshotted `component_name`, `type` (currently always `'service'`; `'replacement'`/`'inspection'` reserved for later), `date`, `distance_at_service`, `notes`. This is the maintenance history; resetting a component's service simultaneously writes a record and bumps `distance_at_service`.
+- **Reporting** — `report.service.ts` generates a per-bike maintenance report (exported as `.docx` via the `docx` package).
 
-- **Bicycle** — a single bike owned by a user. Has identifying info (name, brand, model, type, purchase date, frame size, wheel size) and owns a set of Components.
-- **Component** — a part fitted to a bicycle (e.g. chain, tires, brake pads, cassette, cables). Has an install date, expected lifespan (by time and/or distance), and accumulated wear/usage derived from Activities. May be replaced, which closes out its history and starts a new Component instance.
-- **Activity** — a logged ride/usage event for a bicycle (distance, duration, date, conditions). Drives wear accumulation on the bicycle's components.
-- **MaintenanceRecord / ServiceRecord** — a record of work performed on a bicycle or a specific component: service, repair, inspection, or part replacement. Includes date, usage at time of service, parts/cost/notes. Forms the maintenance history.
-- **MaintenanceSchedule** — a planned future maintenance task for a bicycle or component, defined by a time interval (e.g. every 6 months) and/or usage interval (e.g. every 2000 km), used to compute due/overdue status.
+Note: the originally-envisioned standalone **MaintenanceSchedule** entity (time *and* usage-interval based, separate from Component) was simplified — due/overdue status is currently derived purely from each Component's `service_interval_km` vs. accumulated distance. There is no calendar-based (e.g. "every 6 months") scheduling yet.
 
-Relationships: a Bicycle has many Components; a Bicycle has many Activities; Components and Bicycles each have many MaintenanceRecords; MaintenanceSchedules apply to a Bicycle or a Component and are checked against logged Activities and elapsed time to determine due status.
+## API Surface (implemented)
+
+- `auth.routes.ts` — register, login.
+- `bicycles.routes.ts` — CRUD on bicycles, nested component service-reset, maintenance history, report export.
+- `activities.routes.ts` — CRUD on activities.
+- `dashboard.routes.ts` — `GET /dashboard?period=...` (week/month/etc., defaults to current month) — aggregated stats for the signed-in user.
 
 ## Project Status
 
-This repository is at the design stage: the goal, domain, and stack are defined here, but the Angular frontend and Express backend have not yet been scaffolded. Treat this file as the source of truth for intent and architecture when starting implementation — prefer updating this document as decisions firm up (e.g. concrete schema, folder structure, auth approach) rather than letting it drift out of sync with the code.
+Past the design stage — both apps are scaffolded and functional:
+
+- **Backend**: Express + TypeScript, `better-sqlite3`, `zod` validation, `bcrypt`/`jsonwebtoken` auth, layered architecture with unit tests (Vitest) alongside services/types. Run with `npm run dev` (or `migrate`/`build`/`start`/`test`) from `backend/`.
+- **Frontend**: Angular standalone components, lazy-loaded routes, an `authGuard`/`redirectIfAuthenticatedGuard` pair, and a JWT auth interceptor. Routes: `/login`, `/register`, `/dashboard`, `/activities`, `/bicycles`, `/bicycles/new`, `/bicycles/:id`, `/bicycles/:id/edit`.
+- Recent work (see git log): bike image display across views, per-bike report export, activities list now shows bike image with sort/filter.
+
+Treat this file as the source of truth for intent and architecture, and keep it in sync as the schema/feature set evolves — update it directly rather than letting it drift, since the codebase is now the actual reference, not just a design target.
 
 ## Open Questions / Future Considerations
 
-- Single-user vs multi-user (auth/accounts) — not yet decided.
-- Units (metric vs imperial) for distance-based wear tracking.
-- Notification mechanism for due/overdue maintenance (in-app only vs email/push).
-- Whether wear is calculated purely from logged Activities or also allows manual wear adjustment.
+- ~~Single-user vs multi-user~~ — resolved: multi-user with JWT auth, bicycles scoped per `user_id`.
+- Calendar-based maintenance scheduling (e.g. "every 6 months") — not implemented; only usage-interval (km) based due-status exists today.
+- Units (metric vs imperial) for distance-based wear tracking — currently km-only (`distance_km`, `service_interval_km`).
+- Notification mechanism for due/overdue maintenance (in-app only vs email/push) — not yet implemented; due status is computed but not pushed.
+- Whether wear is calculated purely from logged Activities or also allows manual wear adjustment — currently purely derived from activities (no manual override).
+- Cost tracking on maintenance records (mentioned in the original vision) — not yet in the `maintenance_records` schema.
