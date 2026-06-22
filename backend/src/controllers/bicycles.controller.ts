@@ -70,3 +70,13 @@ export const deleteBicycle = asyncHandler(async (req: Request, res: Response) =>
   await bicycleService.remove(req.params.id, req.userId!);
   res.status(204).send();
 });
+
+export const getBicycleReport = asyncHandler(async (req: Request, res: Response) => {
+  const { buffer, filename } = await bicycleService.generateReport(req.params.id, req.userId!);
+  res.setHeader(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  );
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.send(buffer);
+});

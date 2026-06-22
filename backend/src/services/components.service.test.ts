@@ -14,6 +14,7 @@ vi.mock('../repositories/components.repository.js', () => ({
     findByBikeId: vi.fn(),
     insertMany: vi.fn(),
     setDistanceAtService: vi.fn(),
+    updateServiceInterval: vi.fn(),
     newId: vi.fn(),
   },
 }));
@@ -211,5 +212,45 @@ describe('componentService.resetService', () => {
     expect(record.componentId).toBe('comp-1');
     expect(record.type).toBe('service');
     expect(record.distanceAtService).toBe(1200);
+  });
+});
+
+describe('componentService.updateServiceInterval', () => {
+  it('throws ApiError(404) when the bike does not exist', async () => {
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(undefined);
+    await expect(
+      componentService.updateServiceInterval('ghost', 'comp-1', 4000, userId),
+    ).rejects.toMatchObject({ status: 404, code: 'BICYCLE_NOT_FOUND' });
+  });
+
+  it('throws ApiError(404) when the component does not exist', async () => {
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(sampleBike);
+    vi.mocked(componentRepository.findById).mockReturnValue(undefined);
+    await expect(
+      componentService.updateServiceInterval('bike-1', 'missing', 4000, userId),
+    ).rejects.toMatchObject({ status: 404, code: 'COMPONENT_NOT_FOUND' });
+  });
+
+  it('throws ApiError(404) when the component belongs to a different bike', async () => {
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(sampleBike);
+    vi.mocked(componentRepository.findById).mockReturnValue({
+      ...sampleComponent,
+      bikeId: 'other-bike',
+    });
+    await expect(
+      componentService.updateServiceInterval('bike-1', 'comp-1', 4000, userId),
+    ).rejects.toMatchObject({ status: 404, code: 'COMPONENT_NOT_FOUND' });
+  });
+
+  it('persists the new interval and recomputes wearState against it', async () => {
+    vi.mocked(bicycleRepository.findByIdForUser).mockReturnValue(sampleBike); // totalDistance: 1200
+    vi.mocked(componentRepository.findById).mockReturnValue(sampleComponent); // distanceAtService: 0
+
+    const result = await componentService.updateServiceInterval('bike-1', 'comp-1', 2000, userId);
+
+    expect(componentRepository.updateServiceInterval).toHaveBeenCalledWith('comp-1', 2000);
+    expect(result.serviceIntervalKm).toBe(2000);
+    // 1200 / 2000 * 100 = 60%
+    expect(result.wearState).toBe(60);
   });
 });

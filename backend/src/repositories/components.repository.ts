@@ -79,6 +79,14 @@ export const componentRepository = {
     );
   },
 
+  // Changes how many km the part is expected to last before its next service.
+  updateServiceInterval(id: string, serviceIntervalKm: number): void {
+    db.prepare('UPDATE components SET service_interval_km = ? WHERE id = ?').run(
+      serviceIntervalKm,
+      id,
+    );
+  },
+
   deleteByBikeId(bikeId: string): number {
     const result = db.prepare('DELETE FROM components WHERE bike_id = ?').run(bikeId);
     return result.changes;

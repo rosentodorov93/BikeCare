@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { bicycleTypeLabel, DEFAULT_BIKE_IMAGE } from '../bicycles/bicycle.model';
 import type { BicycleType } from '../bicycles/bicycle.model';
+import { BicycleService } from '../bicycles/bicycle.service';
 import { DashboardService } from './dashboard.service';
 import {
   DASHBOARD_PERIODS,
@@ -28,10 +29,12 @@ type DashboardState =
 })
 export class DashboardComponent {
   private readonly service = inject(DashboardService);
+  private readonly bicycleService = inject(BicycleService);
 
   protected readonly periods = DASHBOARD_PERIODS;
   protected readonly period = signal<DashboardPeriod>('month');
   protected readonly placeholder = DEFAULT_BIKE_IMAGE;
+  protected readonly reportDownloadingId = signal<string | null>(null);
 
   protected onImageError(event: Event): void {
     (event.target as HTMLImageElement).src = this.placeholder;
@@ -80,5 +83,25 @@ export class DashboardComponent {
     return 'warn';
   }
 
+  protected getReport(event: Event, bikeId: string, bikeName: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.reportDownloadingId()) return;
+
+    this.reportDownloadingId.set(bikeId);
+    this.bicycleService.downloadReport(bikeId).subscribe({
+      next: (blob) => {
+        const safeName = bikeName.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${safeName || 'bike'}-report.docx`;
+        link.click();
+        URL.revokeObjectURL(url);
+        this.reportDownloadingId.set(null);
+      },
+      error: () => this.reportDownloadingId.set(null),
+    });
+  }
 }
 

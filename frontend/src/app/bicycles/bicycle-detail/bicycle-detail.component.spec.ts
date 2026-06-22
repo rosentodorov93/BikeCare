@@ -40,7 +40,11 @@ describe('BicycleDetailComponent', () => {
 
   beforeEach(async () => {
     bicycleSpy = jasmine.createSpyObj('BicycleService', ['getById', 'delete']);
-    componentSpy = jasmine.createSpyObj('ComponentService', ['getByBike', 'resetService']);
+    componentSpy = jasmine.createSpyObj('ComponentService', [
+      'getByBike',
+      'resetService',
+      'updateServiceInterval',
+    ]);
 
     bicycleSpy.getById.and.returnValue(of(mockBicycle));
     componentSpy.getByBike.and.returnValue(of([mockComponent]));
@@ -171,6 +175,61 @@ describe('BicycleDetailComponent', () => {
     });
   });
 
+  describe('usedKm()', () => {
+    it('returns km ridden since the last service (bike distance minus baseline)', () => {
+      // bike totalDistance 1200, component serviced at 0 -> 1200
+      expect((component as any).usedKm(mockComponent)).toBe(1200);
+    });
+
+    it('clamps to 0 when the service baseline exceeds the bike distance', () => {
+      expect((component as any).usedKm({ ...mockComponent, distanceAtService: 5000 })).toBe(0);
+    });
+  });
+
+  describe('saveInterval()', () => {
+    function inputEvent(value: string): Event {
+      const input = document.createElement('input');
+      input.value = value;
+      return { target: input } as unknown as Event;
+    }
+
+    it('updates the component in the list after a successful save', fakeAsync(() => {
+      const updated: BikeComponent = { ...mockComponent, serviceIntervalKm: 2500, wearState: 48 };
+      componentSpy.updateServiceInterval.and.returnValue(of(updated));
+
+      (component as any).saveInterval(mockComponent, inputEvent('2500'));
+      tick();
+
+      expect(componentSpy.updateServiceInterval).toHaveBeenCalledWith('b1', 'c1', 2500);
+      const comps: BikeComponent[] = (component as any).components();
+      expect(comps.find((c) => c.id === 'c1')?.serviceIntervalKm).toBe(2500);
+      expect((component as any).savingId()).toBeNull();
+    }));
+
+    it('does nothing when the value is unchanged', () => {
+      (component as any).saveInterval(mockComponent, inputEvent('2000'));
+      expect(componentSpy.updateServiceInterval).not.toHaveBeenCalled();
+    });
+
+    it('ignores invalid (non-positive) values', () => {
+      (component as any).saveInterval(mockComponent, inputEvent('0'));
+      (component as any).saveInterval(mockComponent, inputEvent('abc'));
+      expect(componentSpy.updateServiceInterval).not.toHaveBeenCalled();
+    });
+
+    it('reverts the input and clears savingId on failure', fakeAsync(() => {
+      componentSpy.updateServiceInterval.and.returnValue(throwError(() => new Error('boom')));
+      spyOn(window, 'alert');
+      const ev = inputEvent('2500');
+
+      (component as any).saveInterval(mockComponent, ev);
+      tick();
+
+      expect((ev.target as HTMLInputElement).value).toBe('2000');
+      expect((component as any).savingId()).toBeNull();
+    }));
+  });
+
   describe('confirmDelete()', () => {
     it('should do nothing when deleting is already in progress', fakeAsync(() => {
       fixture.detectChanges();
@@ -206,7 +265,7 @@ describe('BicycleDetailComponent', () => {
 describe('BicycleDetailComponent — error state', () => {
   it('should transition to error state when bicycle fetch fails', async () => {
     const bicycleSpy = jasmine.createSpyObj<BicycleService>('BicycleService', ['getById', 'delete']);
-    const componentSpy = jasmine.createSpyObj<ComponentService>('ComponentService', ['getByBike', 'resetService']);
+    const componentSpy = jasmine.createSpyObj<ComponentService>('ComponentService', ['getByBike', 'resetService', 'updateServiceInterval']);
     bicycleSpy.getById.and.returnValue(throwError(() => new Error('not found')));
     componentSpy.getByBike.and.returnValue(of([]));
 

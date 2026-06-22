@@ -41,4 +41,8 @@ export class BicycleService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  downloadReport(id: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${id}/report`, { responseType: 'blob' });
+  }
 }

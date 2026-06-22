@@ -81,6 +81,15 @@ export const activityRepository = {
     return rows.map((r) => ({ bikeId: r.bike_id, distanceKm: r.distance_km }));
   },
 
+  // Full ride history for one bike, most recent first. Ownership is verified
+  // upstream by the caller (mirrors componentRepository.findByBikeId).
+  findByBikeId(bikeId: string): Activity[] {
+    const rows = db
+      .prepare(`${SELECT_WITH_BIKE} WHERE a.bike_id = ? ORDER BY a.date DESC, a.created_at DESC`)
+      .all(bikeId) as ActivityRow[];
+    return rows.map(toActivity);
+  },
+
   insert(activity: { id: string; bikeId: string; date: string; distanceKm: number; createdAt: string }): void {
     db.prepare(
       `INSERT INTO activities (id, bike_id, date, distance_km, created_at)

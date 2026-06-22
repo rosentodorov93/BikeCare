@@ -52,7 +52,7 @@
   display: block;
   width: 100%;
   max-height: 280px;
-  object-fit: cover;
+  object-fit: contain;
   margin-top: 1.5rem;
   border-radius: var(--bc-radius-lg);
   border: 1px solid var(--bc-border);
@@ -110,7 +110,7 @@
 
 .component {
   display: grid;
-  grid-template-columns: auto 1fr minmax(140px, 200px) auto;
+  grid-template-columns: auto 1fr minmax(140px, 200px) auto auto;
   align-items: center;
   gap: 0.85rem;
   padding: 0.8rem 1rem;
@@ -216,6 +216,71 @@
   color: var(--bc-muted);
   min-width: 2.6rem;
   text-align: right;
+}
+
+.metrics {
+  display: flex;
+  gap: 1.1rem;
+  align-items: center;
+
+  @media (max-width: 560px) {
+    grid-column: 1 / -1;
+    gap: 1.5rem;
+  }
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.metric-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bc-muted);
+  white-space: nowrap;
+}
+
+.metric-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.metric-input {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.interval-input {
+  width: 5.5rem;
+  padding: 0.25rem 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bc-text);
+  background: var(--bc-bg);
+  border: 1px solid var(--bc-border);
+  border-radius: var(--bc-radius-sm, 8px);
+  transition: border-color 0.18s var(--bc-ease), box-shadow 0.18s var(--bc-ease);
+
+  &:focus {
+    outline: none;
+    border-color: var(--bc-primary);
+    box-shadow: 0 0 0 3px var(--bc-gradient-soft);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+}
+
+.metric-unit {
+  font-size: 0.78rem;
+  color: var(--bc-muted);
 }
 
 .btn-reset {

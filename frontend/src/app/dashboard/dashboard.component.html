@@ -117,6 +117,15 @@
                       <span class="bike-stat-period">{{ bike.periodServiceCount }} <small>{{ bike.periodServiceCount === 1 ? 'service' : 'services' }}</small></span>
                       <span class="bike-stat-total">{{ bike.totalServiceCount }}&nbsp;total</span>
                     </span>
+                    <button
+                      type="button"
+                      class="bike-report-btn"
+                      [disabled]="reportDownloadingId() === bike.id"
+                      (click)="getReport($event, bike.id, bike.name)"
+                      title="Download maintenance report"
+                    >
+                      {{ reportDownloadingId() === bike.id ? 'Preparing…' : 'Get report' }}
+                    </button>
                   </a>
                 </li>
               }

@@ -3,10 +3,14 @@ import type {
   UpdateBicycleDto,
 } from '../controllers/bicycles.controller.js';
 import { db } from '../db/connection.js';
+import { activityRepository } from '../repositories/activities.repository.js';
 import { bicycleRepository } from '../repositories/bicycles.repository.js';
 import { componentRepository } from '../repositories/components.repository.js';
+import { maintenanceRepository } from '../repositories/maintenance.repository.js';
+import { generateBicycleReportDocx } from './report.service.js';
 import { componentService } from './components.service.js';
 import type { Bicycle } from '../types/bicycle.js';
+import { computeWearState } from '../types/component.js';
 import { ApiError } from '../utils/api-response.js';
 
 // Business logic for bicycles. Owns id/timestamp generation and not-found rules.
@@ -76,5 +80,18 @@ export const bicycleService = {
     if (!deleted) {
       throw new ApiError(404, 'BICYCLE_NOT_FOUND', `Bicycle ${id} not found`);
     }
+  },
+
+  async generateReport(id: string, userId: string): Promise<{ buffer: Buffer; filename: string }> {
+    const bicycle = await this.getById(id, userId);
+    const components = componentRepository
+      .findByBikeId(id)
+      .map((c) => ({ ...c, wearState: computeWearState(c, bicycle.totalDistance) }));
+    const maintenance = maintenanceRepository.findByBikeId(id);
+    const activities = activityRepository.findByBikeId(id);
+
+    const buffer = await generateBicycleReportDocx(bicycle, components, maintenance, activities);
+    const safeName = bicycle.name.trim().replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase();
+    return { buffer, filename: `${safeName || 'bike'}-report.docx` };
   },
 };

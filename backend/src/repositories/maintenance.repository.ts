@@ -83,6 +83,17 @@ export const maintenanceRepository = {
       .all(userId) as { bikeId: string; count: number }[];
   },
 
+  // Full maintenance history for one bike, most recent first. Ownership is
+  // verified upstream by the caller (mirrors componentRepository.findByBikeId).
+  findByBikeId(bikeId: string): MaintenanceRecord[] {
+    const rows = db
+      .prepare(
+        `SELECT * FROM maintenance_records WHERE bike_id = ? ORDER BY date DESC, created_at DESC`,
+      )
+      .all(bikeId) as MaintenanceRecordRow[];
+    return rows.map(toRecord);
+  },
+
   newId(): string {
     return randomUUID();
   },

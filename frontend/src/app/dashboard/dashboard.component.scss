@@ -369,3 +369,29 @@
   flex-shrink: 0;
   margin: 0 0.25rem;
 }
+
+.bike-report-btn {
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--bc-border);
+  border-radius: 999px;
+  background: var(--bc-surface);
+  color: var(--bc-primary);
+  cursor: pointer;
+  transition: background 0.15s var(--bc-ease), box-shadow 0.15s var(--bc-ease);
+
+  &:hover:not(:disabled) {
+    background: var(--bc-gradient-soft);
+    box-shadow: var(--bc-shadow-xs);
+  }
+
+  &:disabled {
+    color: var(--bc-muted);
+    cursor: default;
+  }
+}

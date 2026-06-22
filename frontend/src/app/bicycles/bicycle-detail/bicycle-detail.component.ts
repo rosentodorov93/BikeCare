@@ -39,6 +39,8 @@ export class BicycleDetailComponent {
   protected readonly components = signal<BikeComponent[]>([]);
   // Id of the component currently being reset, to disable just that button.
   protected readonly resettingId = signal<string | null>(null);
+  // Id of the component whose service interval is currently being saved.
+  protected readonly savingId = signal<string | null>(null);
 
   private readonly state = toSignal(
     this.service.getById(this.id).pipe(
@@ -72,6 +74,41 @@ export class BicycleDetailComponent {
     if (wear > 80) return 'danger';
     if (wear > 50) return 'warn';
     return 'ok';
+  }
+
+  // Km ridden on the part since its last service — the bike's distance now minus
+  // the distance recorded at the last reset. Clamped so it never goes negative.
+  protected usedKm(component: BikeComponent): number {
+    return Math.max(0, (this.bicycle()?.totalDistance ?? 0) - component.distanceAtService);
+  }
+
+  // Persists an edited service interval. Ignores blanks/invalid/unchanged values
+  // so a focus-out without a real edit is a no-op. On success the row is swapped
+  // for the server's version, whose wearState reflects the new interval.
+  protected saveInterval(component: BikeComponent, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = Math.round(Number(input.value));
+
+    if (!Number.isFinite(value) || value <= 0) {
+      input.value = String(component.serviceIntervalKm); // revert to last good value
+      return;
+    }
+    if (value === component.serviceIntervalKm || this.savingId()) return;
+
+    this.savingId.set(component.id);
+    this.componentService.updateServiceInterval(this.id, component.id, value).subscribe({
+      next: (updated) => {
+        this.components.update((list) =>
+          list.map((c) => (c.id === updated.id ? updated : c)),
+        );
+        this.savingId.set(null);
+      },
+      error: () => {
+        this.savingId.set(null);
+        input.value = String(component.serviceIntervalKm); // revert on failure
+        alert('Failed to update the service range. Please try again.');
+      },
+    });
   }
 
   // Marks a component as serviced/replaced; wear returns to 0.

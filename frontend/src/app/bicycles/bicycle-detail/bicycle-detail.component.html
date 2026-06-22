@@ -63,6 +63,29 @@
                   </span>
                   <span class="wear-pct">{{ component.wearState }}%</span>
                 </span>
+                <span class="metrics">
+                  <span class="metric">
+                    <span class="metric-label">Ridden since service</span>
+                    <span class="metric-value">{{ usedKm(component) | number: '1.0-0' }} km</span>
+                  </span>
+                  <span class="metric">
+                    <span class="metric-label">Service range</span>
+                    <span class="metric-input">
+                      <input
+                        type="number"
+                        min="1"
+                        step="100"
+                        class="interval-input"
+                        [value]="component.serviceIntervalKm"
+                        [disabled]="savingId() === component.id"
+                        (blur)="saveInterval(component, $event)"
+                        (keydown.enter)="saveInterval(component, $event)"
+                        title="Adjust the service range (km)"
+                      />
+                      <span class="metric-unit">km</span>
+                    </span>
+                  </span>
+                </span>
                 <button
                   type="button"
                   class="btn btn-secondary btn-reset"

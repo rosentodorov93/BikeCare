@@ -79,4 +79,28 @@ export const componentService = {
       wearState: 0,
     };
   },
+
+  // Adjusts a component's expected service interval (km between services). The
+  // service baseline is untouched, so wear is simply recomputed against the new
+  // interval and returned to the caller.
+  async updateServiceInterval(
+    bikeId: string,
+    componentId: string,
+    serviceIntervalKm: number,
+    userId: string,
+  ): Promise<Component> {
+    const bike = bicycleRepository.findByIdForUser(bikeId, userId);
+    if (!bike) {
+      throw new ApiError(404, 'BICYCLE_NOT_FOUND', `Bicycle ${bikeId} not found`);
+    }
+    const component = componentRepository.findById(componentId);
+    if (!component || component.bikeId !== bikeId) {
+      throw new ApiError(404, 'COMPONENT_NOT_FOUND', `Component ${componentId} not found`);
+    }
+
+    componentRepository.updateServiceInterval(componentId, serviceIntervalKm);
+
+    const updated = { ...component, serviceIntervalKm };
+    return { ...updated, wearState: computeWearState(updated, bike.totalDistance) };
+  },
 };

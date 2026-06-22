@@ -28,4 +28,19 @@ export class ComponentService {
       )
       .pipe(map((res) => res.data));
   }
+
+  // Adjusts the component's service interval (km between services); the backend
+  // returns the component with its wear recomputed against the new interval.
+  updateServiceInterval(
+    bikeId: string,
+    componentId: string,
+    serviceIntervalKm: number,
+  ): Observable<BikeComponent> {
+    return this.http
+      .patch<ApiEnvelope<BikeComponent>>(
+        `/api/bicycles/${bikeId}/components/${componentId}`,
+        { serviceIntervalKm },
+      )
+      .pipe(map((res) => res.data));
+  }
 }
