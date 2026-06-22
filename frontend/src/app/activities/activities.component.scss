@@ -13,6 +13,14 @@
   }
 }
 
+.form-title {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto 0.85rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
 .form {
   // Wrapping flex (rather than a fixed grid) so the form collapses based on its
   // own available width — the fixed sidebar makes the content narrower than the
@@ -21,7 +29,9 @@
   flex-wrap: wrap;
   align-items: end;
   gap: 1rem;
+  width: 100%;
   max-width: 760px;
+  margin: 0 auto;
   background: var(--bc-surface);
   border: 1px solid var(--bc-border);
   border-radius: var(--bc-radius-lg);
@@ -83,7 +93,9 @@
 }
 
 .log {
-  margin-top: 2rem;
+  width: 100%;
+  max-width: 760px;
+  margin: 2rem auto 0;
 
   h2 {
     margin: 0 0 0.85rem;
@@ -96,7 +108,6 @@
   flex-wrap: wrap;
   align-items: end;
   gap: 0.85rem;
-  max-width: 760px;
   margin-bottom: 0.85rem;
 
   h2 {
@@ -151,7 +162,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-width: 760px;
 }
 
 .activity {
