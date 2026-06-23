@@ -100,38 +100,3 @@ cd backend && npm test
 # frontend
 cd frontend && npm test
 ```
-
-## Project Layout
-
-```
-BikeCare/
-├── frontend/   # Angular application
-│   └── src/app/
-│       ├── auth/         # login, register
-│       ├── bicycles/     # bike list/detail/form
-│       ├── components/   # component UI
-│       ├── activities/   # ride log
-│       └── dashboard/    # overview
-├── backend/    # Express.js REST API
-│   └── src/
-│       ├── routes/        # HTTP route definitions
-│       ├── controllers/   # request/response handling
-│       ├── services/      # business logic (wear calc, auth, reports)
-│       ├── repositories/  # SQLite data access
-│       ├── middleware/    # auth, validation, error handling
-│       └── db/             # connection + migrations
-└── CLAUDE.md   # project intent/architecture reference for AI-assisted development
-```
-
-## API Overview
-
-All endpoints are namespaced under `/api` and return a consistent `{ data: ... }` / `{ error: ... }` envelope.
-
-| Route | Auth required | Purpose |
-|---|---|---|
-| `POST /api/auth/register`, `/api/auth/login` | No | User registration/login |
-| `/api/bicycles` | Yes | CRUD for bicycles and their components |
-| `/api/activities` | Yes | CRUD for logged rides |
-| `/api/dashboard` | Yes | Aggregated overview data |
-
-See `Authorization: Bearer <token>` (JWT from login/register) for authenticated routes.
